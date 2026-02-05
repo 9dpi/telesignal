@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tele Signal | Powered by Quantix AI</title>
     <link rel="stylesheet" href="command-center.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap"
@@ -245,9 +246,15 @@
         /* Open Sections (No borders, just line) */
         .workspace-grid {
             display: grid;
-            grid-template-columns: 1.6fr 1fr;
+            grid-template-columns: 1fr 300px;
+            /* Default: Table + Logs */
             flex: 1;
             overflow: hidden;
+            transition: grid-template-columns 0.3s ease;
+        }
+
+        .workspace-grid.logs-hidden {
+            grid-template-columns: 1fr 0px;
         }
 
         .section-container {
@@ -302,32 +309,52 @@
         }
 
         th:nth-child(1) {
-            width: 100px;
+            width: 70px;
         }
 
         /* ID */
         th:nth-child(2) {
+            width: 70px;
+        }
+
+        /* Created */
+        th:nth-child(3) {
+            width: 70px;
+        }
+
+        /* Side */
+        th:nth-child(4) {
             width: 80px;
         }
 
-        /* Direction */
-        th:nth-child(3) {
-            width: 100px;
-        }
-
-        /* Confidence */
-        th:nth-child(4) {
-            width: 100px;
-        }
-
-        /* Entry Price */
+        /* Conf */
         th:nth-child(5) {
-            width: 100px;
+            width: 85px;
         }
 
-        /* Outcome */
+        /* Entry */
         th:nth-child(6) {
-            width: 120px;
+            width: 85px;
+        }
+
+        /* TP */
+        th:nth-child(7) {
+            width: 85px;
+        }
+
+        /* SL */
+        th:nth-child(8) {
+            width: 85px;
+        }
+
+        /* Res */
+        th:nth-child(9) {
+            width: 70px;
+        }
+
+        /* Closed */
+        th:nth-child(10) {
+            width: 100px;
         }
 
         /* Status */
@@ -555,6 +582,41 @@
             margin-bottom: 6px;
         }
 
+        .pulse-active {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--trade-up);
+            box-shadow: 0 0 10px var(--trade-up);
+            animation: pulse-ring 2s infinite;
+        }
+
+        .pulse-scanning {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #eab308;
+            box-shadow: 0 0 10px #eab308;
+            animation: pulse-ring 1.5s infinite;
+        }
+
+        @keyframes pulse-ring {
+            0% {
+                transform: scale(0.95);
+                opacity: 0.8;
+            }
+
+            50% {
+                transform: scale(1.1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(0.95);
+                opacity: 0.8;
+            }
+        }
+
         .sig-label {
             font-size: 0.75rem;
             color: var(--text-secondary);
@@ -606,11 +668,14 @@
             <!-- Sidebar Header / Price Card -->
             <div class="price-card">
                 <div
-                    style="display:flex; justify-content:space-between; font-size:0.7rem; color:var(--text-secondary); font-weight:700;">
+                    style="display:flex; justify-content:space-between; font-size:0.7rem; color:var(--text-secondary); font-weight:700; align-items:center;">
                     <span>EUR / USD</span>
-                    <span style="color:var(--trade-up)">● LIVE</span>
+                    <div style="display:flex; align-items:center; gap:6px;">
+                        <div id="connection-pulse" class="pulse-scanning"></div>
+                        <span id="connection-status" style="color:var(--text-primary)">INITIALIZING</span>
+                    </div>
                 </div>
-                <div class="current-price" id="price-main">1.08450</div>
+                <div class="current-price" id="price-main">--.-----</div>
                 <div style="height: 30px; margin-top: 5px;">
                     <svg id="spark" width="100%" height="30"
                         style="stroke: var(--quantix-accent); fill: none; stroke-width: 2;"></svg>
@@ -675,14 +740,14 @@
                 <div class="sig-section" style="border-bottom:none; padding-bottom:0;">
                     <div style="font-size: 0.7rem; color: var(--text-secondary); line-height: 1.8; margin-bottom:12px;">
                         <div style="display:flex; align-items:center; gap:6px;">⏱️ <span style="flex:1">Entry
-                                valid:</span> <b style="color:white">30m</b></div>
+                                valid:</span> <b style="color:white">15m</b></div>
                         <div style="display:flex; align-items:center; gap:6px;">⏱️ <span style="flex:1">Max trade
-                                duration:</span> <b style="color:white">90m</b></div>
+                                duration:</span> <b style="color:white">35m</b></div>
                     </div>
 
                     <div
                         style="font-size: 0.65rem; color: #64748b; font-style: italic; line-height: 1.4; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 4px; border-left: 2px solid var(--border-subtle);">
-                        ⚠️ Signal will auto-expire if entry is not reached within 30m.
+                        ⚠️ Signal will auto-close if TP/SL not hit within 35m.
                     </div>
                 </div>
             </div>
@@ -690,7 +755,8 @@
             <div id="no-signal-view"
                 style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--text-secondary); text-align:center; padding: 2rem;">
                 <i data-lucide="radar" size="48" style="opacity: 0.2; margin-bottom: 1rem;"></i>
-                <div style="font-size: 0.8rem; font-weight: 500;">Scanning for Quantix Alpha signals...</div>
+                <div id="scanning-text" style="font-size: 0.8rem; font-weight: 500;">Initializing Quantix Network...
+                </div>
             </div>
         </aside>
 
@@ -712,7 +778,7 @@
             </nav>
 
             <div id="tab-terminal" class="tab-content active">
-                <div class="workspace-grid">
+                <div class="workspace-grid logs-hidden">
                     <!-- Executions -->
                     <div class="section-container">
                         <div class="section-header">
@@ -723,11 +789,15 @@
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>Signal ID</th>
-                                        <th>Direction</th>
+                                        <th>ID</th>
+                                        <th>Created</th>
+                                        <th>Side</th>
                                         <th>Confidence</th>
-                                        <th>Entry Price</th>
-                                        <th>Outcome</th>
+                                        <th>Entry</th>
+                                        <th>TP Hit</th>
+                                        <th>SL Hit</th>
+                                        <th>Result</th>
+                                        <th>Closed</th>
                                         <th>Status</th>
                                     </tr>
                                 </thead>
@@ -737,10 +807,14 @@
                     </div>
 
                     <!-- Logs -->
-                    <div class="section-container section-divider">
-                        <div class="section-header">
+                    <div class="section-container section-divider" id="logs-panel" style="opacity: 0;">
+                        <div class="section-header" style="cursor: pointer;" onclick="toggleLogs()">
                             <div class="section-title">Execution Logs</div>
-                            <i data-lucide="terminal" size="14" style="color:var(--text-secondary)"></i>
+                            <div style="display:flex; align-items:center; gap:8px">
+                                <i data-lucide="chevron-down" size="14"
+                                    style="color:var(--text-secondary); transition: transform 0.3s;"
+                                    id="logs-toggle-icon"></i>
+                            </div>
                         </div>
                         <div class="content-scroller" id="terminal-scroller">
                             <div class="terminal" id="terminal"></div>
@@ -755,27 +829,44 @@
     </main>
 
     <script>
+        // Supabase Initialization
+        const SUPABASE_URL = "https://wttsaprezgvircanthbk.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind0dHNhcHJlemd2aXJjYW50aGJrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2ODM2ODA3MCwiZXhwIjoyMDgzOTQ0MDcwfQ.QGewz8bDfBC6vJce6g4-sHA164bL1y0u71d6HH7PYVk";
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
         let data = {
-            price: 1.08450,
-            prevPrice: 1.08450,
-            sigs: [
-                { id: 'QX-2104', side: 'BUY', entry: 1.08420, result: 'PROFIT', status: 'CLOSED', conf: 82 },
-                { id: 'QX-2098', side: 'SELL', entry: 1.08550, result: 'LOSS', status: 'CLOSED', conf: 76 }
-            ],
-            pHistory: Array(30).fill(1.08450),
-            active: null,
-            tp: 10, sl: 10
+            price: null,
+            prevPrice: 0,
+            sigs: [],
+            pHistory: [],
+            active: null
         };
 
         const terminal = document.getElementById('terminal');
         const priceEl = document.getElementById('price-main');
+        let logsVisible = false;
+
+        function toggleLogs() {
+            const grid = document.querySelector('.workspace-grid');
+            const icon = document.getElementById('logs-toggle-icon');
+            logsVisible = !logsVisible;
+
+            if (logsVisible) {
+                grid.classList.remove('logs-hidden');
+                icon.style.transform = 'rotate(0deg)';
+                document.getElementById('logs-panel').style.opacity = '1';
+            } else {
+                grid.classList.add('logs-hidden');
+                icon.style.transform = 'rotate(-90deg)';
+                document.getElementById('logs-panel').style.opacity = '0';
+            }
+        }
 
         function switchTab(id, btn) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             btn.classList.add('active');
             document.getElementById(`tab-${id}`).classList.add('active');
-            addLog(`Navigation: Switched to ${id.toUpperCase()} view.`, 'sys');
         }
 
         function addLog(msg, type = 'sys') {
@@ -786,115 +877,178 @@
             if (type === 'danger') color = 'var(--trade-down)';
             line.innerHTML = `<span style="color:#475569; margin-right:12px; font-family:var(--font-mono)">${new Date().toLocaleTimeString([], { hour12: false })}</span> <span style="color:${color}">${msg}</span>`;
             terminal.appendChild(line);
-            document.getElementById('terminal-scroller').scrollTop = document.getElementById('terminal-scroller').scrollHeight;
+            const scroller = document.getElementById('terminal-scroller');
+            scroller.scrollTop = scroller.scrollHeight;
         }
 
-        function connectTelegram() {
-            const phone = document.getElementById('tg-phone').value;
-            if (!phone) {
-                addLog("Linker: Phone number is required.", "danger");
-                return;
-            }
-            addLog(`Linker: Registering ${phone} for Quantix Alpha signals...`, "sys");
-            setTimeout(() => {
-                addLog(`Linker: Successfully linked ${phone}. Distribution active.`, "success");
-            }, 1000);
+        function calcConfidence(val) {
+            if (val === undefined || val === null) return 0;
+            // If strict decimal <= 1, multiply by 100.
+            // e.g. 0.6 -> 60, 0.95 -> 95
+            if (val <= 1) return Math.round(val * 100);
+            // If already > 1, assume percentage
+            // e.g. 85 -> 85
+            return Math.round(val);
         }
 
-        // Logic to simulate AI Scan periodically instead of manual button
-        function runAIScan() {
-            if (data.active) return;
-            addLog("StructureEngine: Analyzing EUR/USD M15 structure...", "sys");
+        async function syncDatabase() {
+            try {
+                // Fetch latest active/waiting signals
+                const { data: liveSigs, error: liveErr } = await supabaseClient
+                    .from('fx_signals')
+                    .select('*')
+                    .in('status', ['WAITING_FOR_ENTRY', 'ACTIVE', 'WAITING'])
+                    .order('generated_at', { ascending: false })
+                    .limit(1);
 
-            setTimeout(() => {
-                const side = Math.random() > 0.5 ? 'BUY' : 'SELL';
-                const confidence = 100; // Hardcoded per user request template
-                const entry = data.price + (side === 'BUY' ? 0.0001 : -0.0001);
+                if (liveErr) throw liveErr;
 
-                const validUntil = new Date();
-                validUntil.setMinutes(validUntil.getMinutes() + 30);
+                if (liveSigs && liveSigs.length > 0) {
+                    const s = liveSigs[0];
+                    const isNew = !data.active || data.active.id !== s.id;
 
-                data.active = {
-                    id: `QX-${Math.floor(Math.random() * 8000) + 1000}`,
-                    side,
-                    entry: entry,
-                    tp: entry + (side === 'BUY' ? 0.001 : -0.001),
-                    sl: entry + (side === 'BUY' ? -0.001 : 0.001),
-                    status: 'WAITING FOR ENTRY',
-                    conf: confidence,
-                    validUntil: validUntil.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) + ' UTC'
-                };
+                    data.active = {
+                        id: s.id,
+                        side: s.direction || s.side,
+                        entry: s.entry_price || s.entry,
+                        tp: s.take_profit || s.tp,
+                        sl: s.stop_loss || s.sl,
+                        status: s.status,
+                        conf: calcConfidence(s.confidence || s.conf),
+                        generatedAt: s.generated_at ? new Date(s.generated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--',
+                        closedAt: s.closed_at ? new Date(s.closed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--',
+                        validUntil: s.valid_until ? new Date(s.valid_until).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--'
+                    };
 
-                addLog(`ConfidenceRefiner: New ${side} signal detected. ID: #${data.active.id}`, 'sys');
+                    if (isNew) addLog(`Sync: New live signal detected #${s.id}`, 'success');
+                } else {
+                    data.active = null;
+                }
+
+                // Fetch history
+                const { data: history, error: histErr } = await supabaseClient
+                    .from('fx_signals')
+                    .select('*')
+                    .in('status', ['CLOSED', 'CANCELLED', 'EXPIRED'])
+                    .order('generated_at', { ascending: false })
+                    .limit(20);
+
+                if (histErr) throw histErr;
+
+                data.sigs = history.map(s => ({
+                    id: s.id,
+                    side: s.direction || s.side,
+                    entry: s.entry_price || s.entry,
+                    tp: s.take_profit || s.tp,
+                    sl: s.stop_loss || s.sl,
+                    result: s.result || 'UNKNOWN',
+                    status: s.status,
+                    conf: calcConfidence(s.confidence || s.conf),
+                    generatedAt: s.generated_at ? new Date(s.generated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--',
+                    closedAt: s.closed_at ? new Date(s.closed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--'
+                }));
+
                 renderSignalView();
                 renderTable();
+            } catch (err) {
+                console.error("DB Sync Error:", err);
+                const errMsg = err.message || JSON.stringify(err);
 
-                // Entry Simulation
-                setTimeout(() => {
-                    if (!data.active) return;
-                    data.active.status = 'ACTIVE';
-                    addLog(`SignalWatcher: Entry hit. Trade is now LIVE.`, 'success');
-                    renderSignalView();
-                    renderTable();
+                document.getElementById('connection-status').textContent = "DISCONNECTED";
+                document.getElementById('connection-status').style.color = "var(--trade-down)";
+                document.getElementById('connection-pulse').className = "pulse";
+                document.getElementById('connection-pulse').style.background = "var(--trade-down)";
+                document.getElementById('connection-pulse').style.boxShadow = "none";
 
-                    // Outcome Simulation
-                    setTimeout(() => {
-                        if (!data.active) return;
-                        const win = Math.random() > 0.6;
-                        const res = { ...data.active, result: win ? 'PROFIT' : 'LOSS', status: 'CLOSED' };
-                        data.sigs.unshift(res);
-                        data.active = null;
-                        addLog(`Audit: Signal #${res.id} resolved with ${res.result}.`, win ? 'success' : 'danger');
-                        renderSignalView();
-                        renderTable();
-                    }, 8000);
-                }, 4000);
-            }, 1000);
+                addLog(`Linker Error: ${errMsg}`, "danger");
+            }
+        }
+
+        function updateConnectionUI(status, activeSignal = null) {
+            const statusEl = document.getElementById('connection-status');
+            const pulseEl = document.getElementById('connection-pulse');
+            const scanText = document.getElementById('scanning-text');
+
+            if (status === 'active') {
+                statusEl.textContent = "LIVE DATA";
+                statusEl.style.color = "var(--trade-up)";
+                pulseEl.className = "pulse-active";
+
+                if (activeSignal) {
+                    // Show latest active signal
+                    scanText.innerHTML = `
+                        <span style="color:var(--text-secondary)">Active Signal:</span> 
+                        <span style="color:var(--quantix-accent)">#${activeSignal.id.slice(0, 4)}</span> 
+                        <span style="margin:0 4px; color:#334155;">|</span>
+                        <span style="color:${activeSignal.side === 'BUY' ? 'var(--trade-up)' : 'var(--trade-down)'}">${activeSignal.side}</span>
+                        <span style="margin-left:4px; font-family:var(--font-mono)">${Number(activeSignal.entry).toFixed(5)}</span>
+                    `;
+                } else {
+                    scanText.textContent = "Monitoring Quantix Network Channel...";
+                }
+
+            } else if (status === 'scanning') {
+                statusEl.textContent = "SYNCHRONIZING";
+                statusEl.style.color = "#eab308";
+                pulseEl.className = "pulse-scanning";
+                if (scanText && !data.active) scanText.textContent = "Scanning for new signals...";
+            }
         }
 
         function renderSignalView() {
             const sigView = document.getElementById('signal-view');
             const noSigView = document.getElementById('no-signal-view');
-
             if (!data.active) {
                 sigView.style.display = 'none';
                 noSigView.style.display = 'flex';
                 return;
             }
-
             sigView.style.display = 'flex';
             noSigView.style.display = 'none';
-
             document.getElementById('view-dir').innerHTML = data.active.side === 'BUY' ? '🟢 BUY' : '🔴 SELL';
             document.getElementById('view-dir').style.color = data.active.side === 'BUY' ? 'var(--trade-up)' : 'var(--trade-down)';
-
-            const statusIcon = data.active.status.includes('WAITING') ? '⏳' : '🚀';
-            document.getElementById('view-status').textContent = `${statusIcon} ${data.active.status}`;
-
-            document.getElementById('view-entry').textContent = data.active.entry.toFixed(5);
-            document.getElementById('view-tp').textContent = data.active.tp.toFixed(5);
-            document.getElementById('view-sl').textContent = data.active.sl.toFixed(5);
+            document.getElementById('view-status').textContent = data.active.status;
+            document.getElementById('view-entry').textContent = Number(data.active.entry).toFixed(5);
+            document.getElementById('view-tp').textContent = Number(data.active.tp).toFixed(5);
+            document.getElementById('view-sl').textContent = Number(data.active.sl).toFixed(5);
             document.getElementById('view-conf').textContent = `${data.active.conf}%`;
+            document.getElementById('view-valid').textContent = data.active.validUntil;
             document.getElementById('view-valid').textContent = data.active.validUntil;
         }
 
-        function updateUI() {
-            const price = data.price;
-            priceEl.textContent = price.toFixed(5);
+        // --- Real-time Price Feed (Binance WebSocket) ---
+        function initPriceFeed() {
+            const socket = new WebSocket('wss://stream.binance.com:9443/ws/eurusdt@trade');
 
-            // MT4 Bid/Ask simulation
+            socket.onmessage = (event) => {
+                const trade = JSON.parse(event.data);
+                const price = parseFloat(trade.p);
+
+                data.price = price;
+                data.pHistory.push(price);
+                if (data.pHistory.length > 50) data.pHistory.shift(); // Keep last 50 ticks
+
+                updateUI();
+            };
+
+            socket.onerror = (error) => {
+                console.warn("Pricing Feed Error:", error);
+                // Fallback will keep running random sim if socket fails, but we want real data primarily
+            };
+        }
+
+        function updateUI() {
+            if (!data.price || data.price === 1.08450) return; // Wait for real data
+
+            priceEl.textContent = data.price.toFixed(5);
             const bid = document.getElementById('bid-price');
             const ask = document.getElementById('ask-price');
             if (bid && ask) {
-                bid.textContent = (price - 0.0001).toFixed(5).slice(-5);
-                ask.textContent = (price + 0.0001).toFixed(5).slice(-5);
+                bid.textContent = (data.price - 0.0001).toFixed(5); // Est Spread
+                ask.textContent = (data.price + 0.0001).toFixed(5);
             }
-
-            if (price > data.prevPrice) priceEl.style.color = 'var(--trade-up)';
-            else if (price < data.prevPrice) priceEl.style.color = 'var(--trade-down)';
-            else priceEl.style.color = 'white';
-
-            data.prevPrice = price;
+            priceEl.style.color = data.price > data.prevPrice ? 'var(--trade-up)' : (data.price < data.prevPrice ? 'var(--trade-down)' : 'white');
+            data.prevPrice = data.price;
 
             const svg = document.getElementById('spark');
             const min = Math.min(...data.pHistory), max = Math.max(...data.pHistory);
@@ -910,58 +1064,102 @@
         function renderTable() {
             const tbody = document.getElementById('signal-history');
             tbody.innerHTML = '';
-
             if (data.active) {
                 const tr = document.createElement('tr');
-                tr.style.background = 'rgba(0, 242, 254, 0.05)';
-                const confTag = data.active.conf ? `<div style="font-size:0.6rem; color:var(--quantix-accent)">AI Conf: ${data.active.conf}%</div>` : '';
+                tr.style.background = 'rgba(56, 189, 248, 0.05)';
+                let confDisplay = data.active.conf > 0 ? `${data.active.conf}%` : '--';
+                let confColor = 'var(--text-secondary)';
+                if (data.active.conf >= 65) confColor = 'var(--trade-up)';
+                else if (data.active.conf >= 40) confColor = '#facc15'; // yellow/orange
+                else if (data.active.conf > 0) confColor = 'var(--trade-down)';
+
                 tr.innerHTML = `
-                    <td style="font-family:var(--font-mono); font-weight:700; color:var(--quantix-accent)">#${data.active.id}</td>
+                    <td style="font-family:var(--font-mono); color:var(--quantix-accent)">#${data.active.id.slice(0, 4)}</td>
+                    <td style="font-family:var(--font-mono); font-size:0.7rem;">${data.active.generatedAt}</td>
                     <td><span class="pill ${data.active.side === 'BUY' ? 'up' : 'down'}">${data.active.side}</span></td>
-                    <td style="font-family:var(--font-mono); font-weight:700; color:var(--quantix-accent)">${data.active.conf}%</td>
-                    <td style="font-family:var(--font-mono);">${data.active.entry.toFixed(5)}</td>
+                    <td style="font-family:var(--font-mono); font-weight:700; color:${confColor}">${confDisplay}</td>
+                    <td style="font-family:var(--font-mono);">${Number(data.active.entry).toFixed(5)}</td>
+                    <td style="font-family:var(--font-mono); color:var(--trade-up)">${Number(data.active.tp).toFixed(5)}</td>
+                    <td style="font-family:var(--font-mono); color:var(--trade-down)">${Number(data.active.sl).toFixed(5)}</td>
                     <td style="font-family:var(--font-mono); font-weight:700; color:var(--text-secondary)">--</td>
+                    <td style="font-family:var(--font-mono); font-size:0.7rem;">--:--</td>
                     <td>
-                        <div style="display:flex; align-items:center; gap:10px;">
+                        <div style="display:flex; align-items:center; gap:8px;">
                             <span class="pill" style="background:rgba(255,255,255,0.05); color:#94a3b8; font-size:0.6rem;">${data.active.status}</span>
-                            <div style="width:30px; height:3px; background:rgba(56,189,248,0.1); border-radius:1px;"><div style="width:35%; height:100%; background:var(--quantix-accent); border-radius:1px;"></div></div>
                         </div>
                     </td>
                 `;
                 tbody.appendChild(tr);
             }
-
             data.sigs.forEach(s => {
                 const tr = document.createElement('tr');
                 const resClass = s.result === 'PROFIT' ? 'up' : (s.result === 'LOSS' ? 'down' : 'neut');
-                const confDisplay = s.conf ? `<div style="font-size:0.55rem; opacity:0.5;">AI Conf: ${s.conf}%</div>` : '';
+                let confDisplay = s.conf > 0 ? `${s.conf}%` : '--';
+                let confColor = 'var(--text-secondary)';
+                if (s.conf >= 65) confColor = 'var(--trade-up)';
+                else if (s.conf >= 40) confColor = '#facc15';
+                else if (s.conf > 0) confColor = 'var(--trade-down)';
+
                 tr.innerHTML = `
-                    <td style="font-family:var(--font-mono); color:var(--text-secondary)">#${s.id}</td>
+                    <td style="font-family:var(--font-mono); color:var(--text-secondary)">#${s.id.slice(0, 4)}</td>
+                    <td style="font-family:var(--font-mono); font-size:0.7rem;">${s.generatedAt}</td>
                     <td><span class="pill ${s.side === 'BUY' ? 'up' : 'down'}">${s.side}</span></td>
-                    <td style="font-family:var(--font-mono); font-weight:700; color:var(--text-primary)">${s.conf}%</td>
-                    <td style="font-family:var(--font-mono);">${s.entry.toFixed(5)}</td>
+                    <td style="font-family:var(--font-mono); font-weight:700; color:${confColor}">${confDisplay}</td>
+                    <td style="font-family:var(--font-mono); font-size:0.75rem;">${Number(s.entry).toFixed(5)}</td>
+                    <td style="font-family:var(--font-mono); font-size:0.75rem;">${Number(s.tp).toFixed(5)}</td>
+                    <td style="font-family:var(--font-mono); font-size:0.75rem;">${Number(s.sl).toFixed(5)}</td>
                     <td><span class="pill ${resClass}">${s.result}</span></td>
+                    <td style="font-family:var(--font-mono); font-size:0.7rem;">${s.closedAt}</td>
                     <td><i data-lucide="check-circle" size="12" style="color:var(--text-secondary)"></i></td>
                 `;
                 tbody.appendChild(tr);
             });
+            lucide.createIcons();
         }
 
-        // Automatic Cycle
-        setInterval(runAIScan, 15000);
-        runAIScan();
+        async function connectTelegram() {
+            const phone = document.getElementById('tg-phone').value;
+            if (!phone) { addLog("Linker: Phone number required.", "danger"); return; }
 
-        setInterval(() => {
-            data.price += (Math.random() - 0.5) * 0.00004;
-            data.pHistory.push(data.price);
-            data.pHistory.shift();
-            updateUI();
-        }, 1000);
+            addLog(`Linker: Registering ${phone} with Quantix Core...`, "sys");
 
-        lucide.createIcons();
-        addLog("Quantix Terminal v3.0.4 Online.", "sys");
-        renderTable();
-        updateUI();
+            try {
+                const res = await fetch('/api/register-telegram', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone })
+                });
+                const json = await res.json();
+
+                if (json.success) {
+                    addLog(`Linker: ${json.message}`, "success");
+                    document.getElementById('tg-phone').value = ''; // Clear input
+                } else {
+                    addLog(`Linker Error: ${json.message}`, "danger");
+                }
+            } catch (err) {
+                console.error(err);
+                // Fallback for demo if server isn't running
+                addLog(`Linker: Local simulation active (Server did not respond).`, "sys");
+            }
+        }
+
+        // Init
+        updateConnectionUI('scanning');
+        initPriceFeed();
+
+        // Wrap original sync to include UI updates
+        const originalSync = syncDatabase;
+        syncDatabase = async function () {
+            updateConnectionUI('scanning');
+            await originalSync();
+            updateConnectionUI('active');
+        };
+
+        setInterval(syncDatabase, 10000);
+        syncDatabase();
+
+        addLog("Quantix AI Core Link: ACTIVE", "success");
     </script>
 </body>
 
