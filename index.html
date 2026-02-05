@@ -1093,7 +1093,8 @@
             }
             data.sigs.forEach(s => {
                 const tr = document.createElement('tr');
-                const resClass = s.result === 'PROFIT' ? 'up' : (s.result === 'LOSS' ? 'down' : 'neut');
+                const resultRaw = (s.result || 'UNKNOWN').toUpperCase();
+                const resClass = resultRaw === 'PROFIT' ? 'up' : (resultRaw === 'LOSS' ? 'down' : 'neut');
                 let confDisplay = s.conf > 0 ? `${s.conf}%` : '--';
                 let confColor = 'var(--text-secondary)';
                 if (s.conf >= 65) confColor = 'var(--trade-up)';
@@ -1108,7 +1109,7 @@
                     <td style="font-family:var(--font-mono); font-size:0.75rem;">${Number(s.entry).toFixed(5)}</td>
                     <td style="font-family:var(--font-mono); font-size:0.75rem;">${Number(s.tp).toFixed(5)}</td>
                     <td style="font-family:var(--font-mono); font-size:0.75rem;">${Number(s.sl).toFixed(5)}</td>
-                    <td><span class="pill ${resClass}">${s.result}</span></td>
+                    <td><span class="pill ${resClass}">${resultRaw}</span></td>
                     <td style="font-family:var(--font-mono); font-size:0.7rem;">${s.closedAt}</td>
                     <td><i data-lucide="check-circle" size="12" style="color:var(--text-secondary)"></i></td>
                 `;
