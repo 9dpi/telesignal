@@ -804,6 +804,22 @@
                                 <tbody id="signal-history"></tbody>
                             </table>
                         </div>
+                        <!-- Pagination Controls -->
+                        <div
+                            style="display:flex; justify-content:space-between; align-items:center; padding: 10px 16px; border-top: 1px solid var(--border-subtle);">
+                            <div
+                                style="font-size: 0.75rem; color: var(--text-secondary); font-family: var(--font-mono);">
+                                Page <span id="page-num" style="color:white">1</span> / <span id="total-pages">1</span>
+                            </div>
+                            <div style="display:flex; gap:8px;">
+                                <button id="btn-prev" onclick="changePage(-1)"
+                                    style="background:var(--bg-card); border:1px solid var(--border-subtle); color:var(--text-primary); padding:4px 8px; border-radius:4px; cursor:pointer; font-size:0.75rem;"
+                                    disabled>&lt; Prev</button>
+                                <button id="btn-next" onclick="changePage(1)"
+                                    style="background:var(--bg-card); border:1px solid var(--border-subtle); color:var(--text-primary); padding:4px 8px; border-radius:4px; cursor:pointer; font-size:0.75rem;">Next
+                                    &gt;</button>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Logs -->
@@ -839,7 +855,9 @@
             prevPrice: 0,
             sigs: [],
             pHistory: [],
-            active: null
+            active: null,
+            currentPage: 1,
+            itemsPerPage: 10
         };
 
         const terminal = document.getElementById('terminal');
@@ -931,7 +949,7 @@
                     .select('*')
                     .in('status', ['CLOSED', 'CANCELLED', 'EXPIRED'])
                     .order('generated_at', { ascending: false })
-                    .limit(20);
+                    .limit(50);
 
                 if (histErr) throw histErr;
 
@@ -1091,7 +1109,13 @@
                 `;
                 tbody.appendChild(tr);
             }
-            data.sigs.forEach(s => {
+
+            // Pagination Slice
+            const startIndex = (data.currentPage - 1) * data.itemsPerPage;
+            const endIndex = startIndex + data.itemsPerPage;
+            const pageData = data.sigs.slice(startIndex, endIndex);
+
+            pageData.forEach(s => {
                 const tr = document.createElement('tr');
                 const resultRaw = (s.result || 'UNKNOWN').toUpperCase();
                 const resClass = resultRaw === 'PROFIT' ? 'up' : (resultRaw === 'LOSS' ? 'down' : 'neut');
@@ -1116,6 +1140,32 @@
                 tbody.appendChild(tr);
             });
             lucide.createIcons();
+            updatePaginationControls();
+        }
+
+        function updatePaginationControls() {
+            const totalPages = Math.ceil(data.sigs.length / data.itemsPerPage) || 1;
+            document.getElementById('page-num').textContent = data.currentPage;
+            document.getElementById('total-pages').textContent = totalPages;
+
+            const btnPrev = document.getElementById('btn-prev');
+            const btnNext = document.getElementById('btn-next');
+
+            if (btnPrev && btnNext) {
+                btnPrev.disabled = data.currentPage === 1;
+                btnNext.disabled = data.currentPage >= totalPages;
+                btnPrev.style.opacity = data.currentPage === 1 ? '0.5' : '1';
+                btnNext.style.opacity = data.currentPage >= totalPages ? '0.5' : '1';
+            }
+        }
+
+        function changePage(delta) {
+            const totalPages = Math.ceil(data.sigs.length / data.itemsPerPage) || 1;
+            const newPage = data.currentPage + delta;
+            if (newPage >= 1 && newPage <= totalPages) {
+                data.currentPage = newPage;
+                renderTable();
+            }
         }
 
         async function connectTelegram() {
