@@ -1001,6 +1001,20 @@
                         <span style="color:${activeSignal.side === 'BUY' ? 'var(--trade-up)' : 'var(--trade-down)'}">${activeSignal.side}</span>
                         <span style="margin-left:4px; font-family:var(--font-mono)">${Number(activeSignal.entry).toFixed(5)}</span>
                     `;
+                } else if (data.sigs && data.sigs.length > 0) {
+                    // Show last historical signal
+                    const lastSig = data.sigs[0];
+                    let statusColor = '#94a3b8';
+                    if (lastSig.result === 'PROFIT') statusColor = 'var(--trade-up)';
+                    if (lastSig.result === 'LOSS') statusColor = 'var(--trade-down)';
+
+                    scanText.innerHTML = `
+                        <span style="color:var(--text-secondary)">Last Signal:</span> 
+                        <span style="color:#cbd5e1">#${lastSig.id.slice(0, 4)}</span> 
+                        <span style="margin:0 4px; color:#334155;">|</span>
+                        <span style="color:${statusColor}; font-weight:600;">${lastSig.result || lastSig.status}</span>
+                        <span style="margin-left:4px; font-family:var(--font-mono); color:#64748b">${Number(lastSig.entry).toFixed(5)}</span>
+                    `;
                 } else {
                     scanText.textContent = "Monitoring Quantix Network Channel...";
                 }
@@ -1016,22 +1030,46 @@
         function renderSignalView() {
             const sigView = document.getElementById('signal-view');
             const noSigView = document.getElementById('no-signal-view');
-            if (!data.active) {
+
+            // Determine which signal to show: Active > Last History > None
+            let displaySig = data.active;
+            let isHistorical = false;
+
+            if (!displaySig && data.sigs.length > 0) {
+                displaySig = data.sigs[0];
+                isHistorical = true;
+            }
+
+            if (!displaySig) {
                 sigView.style.display = 'none';
                 noSigView.style.display = 'flex';
                 return;
             }
+
             sigView.style.display = 'flex';
             noSigView.style.display = 'none';
-            document.getElementById('view-dir').innerHTML = data.active.side === 'BUY' ? '🟢 BUY' : '🔴 SELL';
-            document.getElementById('view-dir').style.color = data.active.side === 'BUY' ? 'var(--trade-up)' : 'var(--trade-down)';
-            document.getElementById('view-status').textContent = data.active.status;
-            document.getElementById('view-entry').textContent = Number(data.active.entry).toFixed(5);
-            document.getElementById('view-tp').textContent = Number(data.active.tp).toFixed(5);
-            document.getElementById('view-sl').textContent = Number(data.active.sl).toFixed(5);
-            document.getElementById('view-conf').textContent = `${data.active.conf}%`;
-            document.getElementById('view-valid').textContent = data.active.validUntil;
-            document.getElementById('view-valid').textContent = data.active.validUntil;
+
+            // Populate View
+            document.getElementById('view-dir').innerHTML = displaySig.side === 'BUY' ? '🟢 BUY' : '🔴 SELL';
+            document.getElementById('view-dir').style.color = displaySig.side === 'BUY' ? 'var(--trade-up)' : 'var(--trade-down)';
+
+            // Status Logic
+            const statusEl = document.getElementById('view-status');
+            statusEl.textContent = displaySig.status;
+            if (isHistorical) {
+                statusEl.style.color = displaySig.result === 'PROFIT' ? 'var(--trade-up)' : (displaySig.result === 'LOSS' ? 'var(--trade-down)' : 'var(--text-secondary)');
+            } else {
+                statusEl.style.color = 'var(--quantix-accent)';
+            }
+
+            document.getElementById('view-entry').textContent = Number(displaySig.entry).toFixed(5);
+            document.getElementById('view-tp').textContent = Number(displaySig.tp).toFixed(5);
+            document.getElementById('view-sl').textContent = Number(displaySig.sl).toFixed(5);
+            document.getElementById('view-conf').textContent = `${displaySig.conf}%`;
+
+            // Valid Until might not be in historical objects, handle gracefully
+            const validTime = displaySig.validUntil || displaySig.closedAt || '--:--';
+            document.getElementById('view-valid').textContent = validTime;
         }
 
         // --- Real-time Price Feed (Binance WebSocket) ---
