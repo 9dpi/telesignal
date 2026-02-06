@@ -20,18 +20,32 @@ const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_KEY;
 
 if (!SUPABASE_URL || !SUPABASE_KEY) {
-    console.warn("⚠️  WARNING: SUPABASE_URL or SUPABASE_KEY is missing.");
+    console.warn("⚠️  WARNING: Missing Supabase credentials");
 }
 
 const supabase = createClient(SUPABASE_URL || '', SUPABASE_KEY || '');
 
+// Middleware
 app.use(cors());
 app.use(bodyParser.json());
+
+// Logging middleware
+app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+    next();
+});
+
+// ===== API ROUTES (MUST BE BEFORE STATIC) =====
+
+// Health check
+app.get('/api/health', (req, res) => {
+    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
 
 // API: Fetch Signals
 app.get('/api/signals', async (req, res) => {
     try {
-        console.log(`[${new Date().toLocaleTimeString()}] Fetching signals...`);
+        console.log('Fetching signals from Supabase...');
 
         const { data: liveSigs, error: liveErr } = await supabase
             .from('fx_signals')
@@ -40,7 +54,10 @@ app.get('/api/signals', async (req, res) => {
             .order('generated_at', { ascending: false })
             .limit(1);
 
-        if (liveErr) throw liveErr;
+        if (liveErr) {
+            console.error('Live signals error:', liveErr);
+            throw liveErr;
+        }
 
         const { data: history, error: histErr } = await supabase
             .from('fx_signals')
@@ -49,15 +66,21 @@ app.get('/api/signals', async (req, res) => {
             .order('generated_at', { ascending: false })
             .limit(50);
 
-        if (histErr) throw histErr;
+        if (histErr) {
+            console.error('History error:', histErr);
+            throw histErr;
+        }
 
-        res.json({
+        const response = {
             success: true,
             active: liveSigs && liveSigs.length > 0 ? liveSigs[0] : null,
             history: history || []
-        });
+        };
+
+        console.log(`Returning ${history?.length || 0} historical signals`);
+        res.json(response);
     } catch (err) {
-        console.error("Supabase Error:", err.message);
+        console.error("API Error:", err.message);
         res.status(500).json({ success: false, message: err.message });
     }
 });
@@ -82,18 +105,20 @@ app.post('/api/register-telegram', (req, res) => {
     }
 });
 
-// Serve static files
+// ===== STATIC FILES (AFTER API ROUTES) =====
 app.use(express.static(__dirname));
 
-// Explicit root route for Railway
-app.get('/', (req, res) => {
+// Fallback for SPA
+app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 app.listen(PORT, () => {
-    console.log(`\n---------------------------------------------------`);
-    console.log(`🚀 SERVER RUNNING ON PORT ${PORT}`);
-    console.log(`📡 Database: ${SUPABASE_URL ? 'Connected' : 'Disconnected'}`);
-    console.log(`📂 Serving: ${__dirname}`);
-    console.log(`---------------------------------------------------\n`);
+    console.log(`\n${'='.repeat(60)}`);
+    console.log(`🚀 QUANTIX PRODUCTION SERVER`);
+    console.log(`📍 Port: ${PORT}`);
+    console.log(`📡 Supabase: ${SUPABASE_URL ? '✅ Connected' : '❌ Disconnected'}`);
+    console.log(`📂 Static: ${__dirname}`);
+    console.log(`🔗 API: /api/signals, /api/register-telegram, /api/health`);
+    console.log(`${'='.repeat(60)}\n`);
 });
