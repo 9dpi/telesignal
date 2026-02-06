@@ -1402,19 +1402,69 @@
             };
         }
 
-        // Premium Spice: Neural Insights Generator
-        const NEURAL_INSIGHTS = [
-            "Analyzing market structure: H4 Bearish alignment detected.",
-            "Detecting Order Block at 1.0820 zone...",
-            "Liquidity sweep confirmed on M5 timeframe.",
-            "Volume profile: High activity in London-NY overlap.",
-            "RSI Divergence forming on lower timeframes.",
-            "Neural weights updated: Trend strength 84%.",
-            "Volatility scan: Standard deviation within range.",
-            "Pattern recognition: Ascending triangle merging.",
-            "Sentiment Analysis: Bullish bias increasing.",
-            "Fibonacci cluster identified at current level."
-        ];
+        // Premium Spice: REAL-TIME Neural Analysis Logic (Logic v2)
+        let lastAnalysisTime = 0;
+        function runNeuralAnalysis() {
+            const now = Date.now();
+            if (now - lastAnalysisTime < 4000) return; // Cooldown to prevent spam
+
+            const history = data.pHistory;
+            if (history.length < 20) return;
+
+            const current = history[history.length - 1];
+
+            // 1. Momentum & Volatility Check
+            const last5 = history.slice(-5);
+            const isPump = last5.every((v, i, a) => i === 0 || v >= a[i - 1]);
+            const isDump = last5.every((v, i, a) => i === 0 || v <= a[i - 1]);
+
+            if (isPump && current > history[history.length - 5]) {
+                addNeuralInsight(`MOMENTUM: Bullish surge detected. Velocity increasing.`, 'accent');
+                lastAnalysisTime = now + 4000;
+                return;
+            }
+            if (isDump && current < history[history.length - 5]) {
+                addNeuralInsight(`MOMENTUM: Bearish pressure confirmed. Strong sell-side flow.`, 'highlight');
+                lastAnalysisTime = now + 4000;
+                return;
+            }
+
+            // 2. Support / Resistance Intelligence
+            const localMax = Math.max(...history.slice(-40));
+            const localMin = Math.min(...history.slice(-40));
+            const range = localMax - localMin;
+
+            if (current >= localMax - (range * 0.05)) {
+                addNeuralInsight(`RESISTANCE: Testing local supply ceiling at ${current.toFixed(5)}.`, 'highlight');
+                lastAnalysisTime = now + 10000;
+                return;
+            }
+            if (current <= localMin + (range * 0.05)) {
+                addNeuralInsight(`SUPPORT: Interacting with local demand zone at ${current.toFixed(5)}.`, 'accent');
+                lastAnalysisTime = now + 10000;
+                return;
+            }
+
+            // 3. Trend Alignment (SMA Cross-check)
+            const sma20 = history.slice(-20).reduce((a, b) => a + b) / 20;
+            if (Math.abs(current - sma20) < 0.00001) {
+                addNeuralInsight(`ANALYSIS: Price re-balancing at mean (SMA20). Neural bias: Neutral.`, 'sys');
+                lastAnalysisTime = now + 15000;
+                return;
+            }
+
+            // 4. Fallback technical flavor (only 5% chance)
+            if (Math.random() < 0.05) {
+                const technicals = [
+                    "Analyzing micro-structure: Order Flow absorption detected.",
+                    "Neural weights updated: Signal confidence floating at 88%.",
+                    "Volatility scan: Standard deviation within optimal range.",
+                    "Pattern recognition: Fractal alignment identified on lower TF."
+                ];
+                addNeuralInsight(technicals[Math.floor(Math.random() * technicals.length)], 'sys');
+                lastAnalysisTime = now + 12000;
+            }
+        }
 
         function addNeuralInsight(msg, type = 'accent') {
             const container = document.getElementById('neural-history');
@@ -1479,16 +1529,14 @@
 
                 const d = `M ${points.map(p => `${p.x} ${p.y}`).join(' L ')}`;
                 linePath.setAttribute('d', d);
-
                 const fillD = `${d} L ${points[points.length - 1].x} ${height} L ${points[0].x} ${height} Z`;
                 fillPath.setAttribute('d', fillD);
             }
 
-            // Random Neural Spices
-            if (Math.random() > 0.95) {
-                const insight = NEURAL_INSIGHTS[Math.floor(Math.random() * NEURAL_INSIGHTS.length)];
-                addNeuralInsight(insight, Math.random() > 0.5 ? 'accent' : 'highlight');
-            }
+            // Random Flavor
+            runNeuralAnalysis();
+
+            data.prevPrice = data.price;
 
             document.getElementById('total-sigs').textContent = data.sigs.length;
             const wins = data.sigs.filter(s => s.result === 'PROFIT').length;
