@@ -1787,7 +1787,37 @@
 
         addLog("Quantix AI Core Link: ACTIVE", "success");
 
-        // Security protections removed for debugging/inspection
+        // --- SECURITY PROTECTIONS (PRODUCTION MODE) ---
+        (function () {
+            // 1. Disable Right Click
+            document.addEventListener('contextmenu', event => event.preventDefault());
+
+            // 2. Disable Keyboard Shortcuts (F12, Ctrl+Shift+I, Ctrl+U, etc.)
+            document.onkeydown = function (e) {
+                if (e.keyCode == 123) return false; // F12
+                if (e.ctrlKey && e.shiftKey && (e.keyCode == 'I'.charCodeAt(0) || e.keyCode == 'J'.charCodeAt(0) || e.keyCode == 'C'.charCodeAt(0))) return false;
+                if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false; // View Source
+            };
+
+            // 3. Basic Debugger Trap (Deterrent for DevTools)
+            setInterval(function () {
+                const startTime = performance.now();
+                debugger;
+                const endTime = performance.now();
+                if (endTime - startTime > 100) {
+                    console.clear();
+                    document.body.innerHTML = '<div style="background:#000; color:#f00; height:100vh; display:flex; align-items:center; justify-content:center; font-family:monospace;">SECURITY ACCESS DENIED: SYSTEM PROTECTED</div>';
+                }
+            }, 1000);
+
+            // 4. Console Protection
+            if (typeof console !== "undefined") {
+                const noop = () => { };
+                console.warn = noop;
+                console.error = noop;
+                console.info = noop;
+            }
+        })();
     </script>
 </body>
 
