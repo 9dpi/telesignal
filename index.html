@@ -137,8 +137,9 @@
             display: flex;
             flex-direction: column;
             padding: 1.5rem;
-            gap: 2rem;
             flex-shrink: 0;
+            overflow-y: auto;
+            /* Allow sidebar scrolling if needed */
         }
 
         .price-card {
@@ -243,24 +244,29 @@
             outline: none;
         }
 
-        /* Open Sections (No borders, just line) */
+        /* Workspace Flex Layout */
         .workspace-grid {
-            display: grid;
-            grid-template-columns: 1fr 300px;
-            /* Default: Table + Logs */
-            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
             overflow: hidden;
-            transition: grid-template-columns 0.3s ease;
         }
 
-        .workspace-grid.logs-hidden {
-            grid-template-columns: 1fr 0px;
+        /* Top Section (Table) takes remaining space */
+        .workspace-grid>.section-container:first-child {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
         }
 
         .section-container {
+            flex: 1;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
+            position: relative;
         }
 
         .section-divider {
@@ -290,9 +296,14 @@
 
         /* Table Reset */
         table {
-            width: 100%;
+            width: 98%;
+            margin: 0 auto;
+            /* Center the table */
+            min-width: 1000px;
+            /* Ensure table has breathing room */
             border-collapse: collapse;
             table-layout: fixed;
+            /* Force column widths */
         }
 
         th {
@@ -308,53 +319,44 @@
             white-space: nowrap;
         }
 
-        th:nth-child(1) {
-            width: 70px;
-        }
-
-        /* ID */
-        th:nth-child(2) {
-            width: 70px;
-        }
-
-        /* Created */
-        th:nth-child(3) {
-            width: 70px;
-        }
-
-        /* Side */
-        th:nth-child(4) {
-            width: 80px;
-        }
-
-        /* Conf */
-        th:nth-child(5) {
-            width: 85px;
-        }
-
-        /* Entry */
-        th:nth-child(6) {
-            width: 85px;
-        }
-
-        /* TP */
-        th:nth-child(7) {
-            width: 85px;
-        }
-
-        /* SL */
+        /* Specific Column Tweaks (Optional min-widths) */
+        th:nth-child(6),
+        th:nth-child(7),
         th:nth-child(8) {
-            width: 85px;
+            width: 10%;
         }
 
-        /* Res */
+        /* Prices */
         th:nth-child(9) {
-            width: 70px;
+            width: 15%;
+        }
+
+        /* Win/Loss */
+        th:nth-child(10) {
+            width: 10%;
         }
 
         /* Closed */
+
+        /* Prices */
+        th:nth-child(8) {
+            width: 8%;
+        }
+
+        /* Result */
+        th:nth-child(9) {
+            width: 12%;
+        }
+
+        /* Win/Loss */
         th:nth-child(10) {
-            width: 100px;
+            width: 8%;
+        }
+
+        /* Closed */
+        th:nth-child(11) {
+            width: 5%;
+            text-align: center;
         }
 
         /* Status */
@@ -752,6 +754,34 @@
                 </div>
             </div>
 
+            <!-- NEW: Live Trade Progress Bar -->
+            <div id="trade-progress-container"
+                style="display:none; margin-top:15px; padding-top:10px; border-top:1px solid var(--border-subtle);">
+                <div
+                    style="display:flex; justify-content:space-between; font-size:0.65rem; color:var(--text-secondary); margin-bottom:4px; font-family:var(--font-mono);">
+                    <span>SL</span>
+                    <span id="live-pnl-text" style="font-weight:bold;">NEUTRAL</span>
+                    <span>TP</span>
+                </div>
+                <div
+                    style="position:relative; height:6px; background:rgba(255,255,255,0.1); border-radius:3px; width:100%;">
+                    <!-- Entry Marker -->
+                    <div id="entry-marker"
+                        style="position:absolute; top:-2px; bottom:-2px; width:2px; background:white; opacity:0.5; z-index:1;">
+                    </div>
+                    <!-- Progress Fill -->
+                    <div id="tp-bar-fill"
+                        style="position:absolute; left:0; top:0; height:100%; border-radius:3px; background:var(--trade-up); width:0%; transition: width 0.3s ease, background 0.3s;">
+                    </div>
+                    <!-- Current Price Marker -->
+                    <div id="price-marker"
+                        style="position:absolute; top:-4px; width:8px; height:14px; background:white; border-radius:2px; transform:translateX(-50%); box-shadow:0 0 5px rgba(255,255,255,0.5); z-index:2; transition: left 0.3s ease;">
+                    </div>
+                </div>
+            </div>
+
+            </div>
+
             <div id="no-signal-view"
                 style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--text-secondary); text-align:center; padding: 2rem;">
                 <i data-lucide="radar" size="48" style="opacity: 0.2; margin-bottom: 1rem;"></i>
@@ -778,7 +808,7 @@
             </nav>
 
             <div id="tab-terminal" class="tab-content active">
-                <div class="workspace-grid logs-hidden">
+                <div class="workspace-grid">
                     <!-- Executions -->
                     <div class="section-container">
                         <div class="section-header">
@@ -792,11 +822,11 @@
                                         <th>ID</th>
                                         <th>Created</th>
                                         <th>Side</th>
-                                        <th>Confidence</th>
+                                        <th>Conf</th>
                                         <th>Entry</th>
-                                        <th>TP Hit</th>
-                                        <th>SL Hit</th>
-                                        <th>Result</th>
+                                        <th>TP</th>
+                                        <th>SL</th>
+                                        <th>Win/Loss</th>
                                         <th>Closed</th>
                                         <th>Status</th>
                                     </tr>
@@ -822,20 +852,24 @@
                         </div>
                     </div>
 
-                    <!-- Logs -->
-                    <div class="section-container section-divider" id="logs-panel" style="opacity: 0;">
-                        <div class="section-header" style="cursor: pointer;" onclick="toggleLogs()">
-                            <div class="section-title">Execution Logs</div>
-                            <div style="display:flex; align-items:center; gap:8px">
-                                <i data-lucide="chevron-down" size="14"
-                                    style="color:var(--text-secondary); transition: transform 0.3s;"
-                                    id="logs-toggle-icon"></i>
-                            </div>
+                    <!-- App Footer -->
+                    <footer
+                        style="padding: 1.5rem 0; border-top: 1px solid var(--border-subtle); margin-top: auto; text-align: center;">
+                        <div style="font-family: var(--font-mono); font-size: 0.7rem; color: #475569;">
+                            &copy; 2026 QUANTIX AI CORE. All systems nominal.
                         </div>
-                        <div class="content-scroller" id="terminal-scroller">
-                            <div class="terminal" id="terminal"></div>
+                        <div style="margin-top: 6px; display: flex; justify-content: center; gap: 16px;">
+                            <a href="#"
+                                style="color: var(--text-secondary); font-size: 0.65rem; text-decoration: none;">Terms
+                                of Service</a>
+                            <a href="#"
+                                style="color: var(--text-secondary); font-size: 0.65rem; text-decoration: none;">Privacy
+                                Policy</a>
+                            <a href="#"
+                                style="color: var(--text-secondary); font-size: 0.65rem; text-decoration: none;">API
+                                Status</a>
                         </div>
-                    </div>
+                    </footer>
                 </div>
             </div>
 
@@ -862,23 +896,6 @@
 
         const terminal = document.getElementById('terminal');
         const priceEl = document.getElementById('price-main');
-        let logsVisible = false;
-
-        function toggleLogs() {
-            const grid = document.querySelector('.workspace-grid');
-            const icon = document.getElementById('logs-toggle-icon');
-            logsVisible = !logsVisible;
-
-            if (logsVisible) {
-                grid.classList.remove('logs-hidden');
-                icon.style.transform = 'rotate(0deg)';
-                document.getElementById('logs-panel').style.opacity = '1';
-            } else {
-                grid.classList.add('logs-hidden');
-                icon.style.transform = 'rotate(-90deg)';
-                document.getElementById('logs-panel').style.opacity = '0';
-            }
-        }
 
         function switchTab(id, btn) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -888,15 +905,8 @@
         }
 
         function addLog(msg, type = 'sys') {
-            const line = document.createElement('div');
-            line.className = `log-line`;
-            let color = '#94a3b8';
-            if (type === 'success') color = 'var(--trade-up)';
-            if (type === 'danger') color = 'var(--trade-down)';
-            line.innerHTML = `<span style="color:#475569; margin-right:12px; font-family:var(--font-mono)">${new Date().toLocaleTimeString([], { hour12: false })}</span> <span style="color:${color}">${msg}</span>`;
-            terminal.appendChild(line);
-            const scroller = document.getElementById('terminal-scroller');
-            scroller.scrollTop = scroller.scrollHeight;
+            console.log(`[LOG] ${new Date().toLocaleTimeString()} - ${type}: ${msg}`);
+            // Logs panel removed, logging to console only for debug
         }
 
         function calcConfidence(val) {
@@ -931,8 +941,9 @@
                         entry: s.entry_price || s.entry,
                         tp: s.take_profit || s.tp,
                         sl: s.stop_loss || s.sl,
+                        sl: s.stop_loss || s.sl,
                         status: s.status,
-                        conf: calcConfidence(s.confidence || s.conf),
+                        conf: calcConfidence(s.ai_confidence || s.release_confidence || s.confidence || s.conf),
                         generatedAt: s.generated_at ? new Date(s.generated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--',
                         closedAt: s.closed_at ? new Date(s.closed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--',
                         validUntil: s.valid_until ? new Date(s.valid_until).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--'
@@ -961,7 +972,7 @@
                     sl: s.stop_loss || s.sl,
                     result: s.result || 'UNKNOWN',
                     status: s.status,
-                    conf: calcConfidence(s.confidence || s.conf),
+                    conf: calcConfidence(s.ai_confidence || s.release_confidence || s.confidence || s.conf),
                     generatedAt: s.generated_at ? new Date(s.generated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--',
                     closedAt: s.closed_at ? new Date(s.closed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--'
                 }));
@@ -1070,6 +1081,74 @@
             // Valid Until might not be in historical objects, handle gracefully
             const validTime = displaySig.validUntil || displaySig.closedAt || '--:--';
             document.getElementById('view-valid').textContent = validTime;
+
+            // --- LIVE PROGRESS VISUALIZER ---
+            // Only show logic if we have valid numerical params and data.price is available
+            const progressContainer = document.getElementById('trade-progress-container');
+            if (data.active && data.price && !isHistorical && displaySig.status === 'ACTIVE') {
+                progressContainer.style.display = 'block';
+
+                const entry = parseFloat(displaySig.entry);
+                const tp = parseFloat(displaySig.tp);
+                const sl = parseFloat(displaySig.sl);
+                const current = data.price;
+                const side = displaySig.side;
+
+                // Calculate total range (SL <-> TP distance)
+                // For normalization: 0% = SL, 100% = TP
+                // But wait, for visual balance, let's map: 
+                // 0% = SL, 50% = Entry, 100% = TP? No, distance is asymmetric.
+                // Let's us simple linear mapping between SL and TP.
+
+                let totalDist, distFromSL;
+
+                if (side === 'BUY') {
+                    totalDist = tp - sl;
+                    distFromSL = current - sl;
+                } else { // SELL: SL is higher than TP
+                    totalDist = sl - tp;
+                    distFromSL = sl - current; // price going down means moving away from SL (up in profit)
+                }
+
+                // % Progress from SL (0%) to TP (100%)
+                let pct = (distFromSL / totalDist) * 100;
+                pct = Math.max(0, Math.min(100, pct)); // Clamp 0-100
+
+                // Visual Setup
+                const barFill = document.getElementById('tp-bar-fill');
+                const marker = document.getElementById('price-marker');
+                const pnlText = document.getElementById('live-pnl-text');
+
+                barFill.style.width = `${pct}%`;
+                marker.style.left = `${pct}%`;
+
+                // PnL Color Logic
+                // Entry point relative position
+                // BUY: Entry > SL. SELL: Entry < SL. 
+                // Let's calculate Entry % position
+                let entryPct;
+                if (side === 'BUY') entryPct = ((entry - sl) / totalDist) * 100;
+                else entryPct = ((sl - entry) / totalDist) * 100;
+
+                document.getElementById('entry-marker').style.left = `${entryPct}%`;
+
+                if (pct > entryPct) {
+                    // Winning Zone
+                    barFill.style.background = 'linear-gradient(90deg, var(--trade-up) 0%, #10b981 100%)';
+                    barFill.style.boxShadow = '0 0 10px rgba(16, 185, 129, 0.4)';
+                    pnlText.style.color = 'var(--trade-up)';
+                    pnlText.textContent = 'PROFIT ZONE';
+                } else {
+                    // Losing Zone
+                    barFill.style.background = 'linear-gradient(90deg, #ef4444 0%, var(--trade-down) 100%)';
+                    barFill.style.boxShadow = '0 0 10px rgba(239, 68, 68, 0.4)';
+                    pnlText.style.color = 'var(--trade-down)';
+                    pnlText.textContent = 'DRAWDOWN';
+                }
+
+            } else {
+                progressContainer.style.display = 'none';
+            }
         }
 
         // --- Real-time Price Feed (Binance WebSocket) ---
@@ -1084,7 +1163,11 @@
                 data.pHistory.push(price);
                 if (data.pHistory.length > 50) data.pHistory.shift(); // Keep last 50 ticks
 
+                if (data.pHistory.length > 50) data.pHistory.shift(); // Keep last 50 ticks
+
                 updateUI();
+                // Trigger visual update for progress bar continuously
+                renderSignalView();
             };
 
             socket.onerror = (error) => {
@@ -1130,8 +1213,8 @@
                 else if (data.active.conf > 0) confColor = 'var(--trade-down)';
 
                 tr.innerHTML = `
-                    <td style="font-family:var(--font-mono); color:var(--quantix-accent)">#${data.active.id.slice(0, 4)}</td>
-                    <td style="font-family:var(--font-mono); font-size:0.7rem;">${data.active.generatedAt}</td>
+                    <td style="font-family:var(--font-mono); color:var(--quantix-accent); font-size:0.8rem;">${data.active.id}</td>
+                    <td style="font-family:var(--font-mono); font-size:0.75rem;">${data.active.generatedAt}</td>
                     <td><span class="pill ${data.active.side === 'BUY' ? 'up' : 'down'}">${data.active.side}</span></td>
                     <td style="font-family:var(--font-mono); font-weight:700; color:${confColor}">${confDisplay}</td>
                     <td style="font-family:var(--font-mono);">${Number(data.active.entry).toFixed(5)}</td>
@@ -1139,11 +1222,7 @@
                     <td style="font-family:var(--font-mono); color:var(--trade-down)">${Number(data.active.sl).toFixed(5)}</td>
                     <td style="font-family:var(--font-mono); font-weight:700; color:var(--text-secondary)">--</td>
                     <td style="font-family:var(--font-mono); font-size:0.7rem;">--:--</td>
-                    <td>
-                        <div style="display:flex; align-items:center; gap:8px;">
-                            <span class="pill" style="background:rgba(255,255,255,0.05); color:#94a3b8; font-size:0.6rem;">${data.active.status}</span>
-                        </div>
-                    </td>
+                    <td><span class="pill" style="background:rgba(255,255,255,0.05); color:#94a3b8;">${data.active.status}</span></td>
                 `;
                 tbody.appendChild(tr);
             }
@@ -1163,17 +1242,44 @@
                 else if (s.conf >= 40) confColor = '#facc15';
                 else if (s.conf > 0) confColor = 'var(--trade-down)';
 
+                // Calculate Pips
+                let pipsDisplay = '--';
+                let pipsColor = 'var(--text-secondary)';
+
+                if (resultRaw === 'PROFIT' || resultRaw === 'LOSS') {
+                    // Start with basic dist
+                    let dist = 0;
+                    if (resultRaw === 'PROFIT') {
+                        // Profit distance = |Entry - TP|
+                        dist = Math.abs(s.entry - s.tp);
+                    } else {
+                        // Loss distance = |Entry - SL|
+                        dist = Math.abs(s.entry - s.sl);
+                    }
+
+                    // Convert to pips (approx for EURUSD)
+                    let pips = Math.round(dist * 10000 * 10) / 10;
+
+                    if (resultRaw === 'PROFIT') {
+                        pipsDisplay = `+${pips} pips`;
+                        pipsColor = 'var(--trade-up)';
+                    } else {
+                        pipsDisplay = `-${pips} pips`;
+                        pipsColor = 'var(--trade-down)';
+                    }
+                }
+
                 tr.innerHTML = `
-                    <td style="font-family:var(--font-mono); color:var(--text-secondary)">#${s.id.slice(0, 4)}</td>
-                    <td style="font-family:var(--font-mono); font-size:0.7rem;">${s.generatedAt}</td>
+                    <td style="font-family:var(--font-mono); color:var(--text-primary); font-size:0.8rem;">${s.id}</td>
+                    <td style="font-family:var(--font-mono); font-size:0.75rem;">${s.generatedAt}</td>
                     <td><span class="pill ${s.side === 'BUY' ? 'up' : 'down'}">${s.side}</span></td>
                     <td style="font-family:var(--font-mono); font-weight:700; color:${confColor}">${confDisplay}</td>
                     <td style="font-family:var(--font-mono); font-size:0.75rem;">${Number(s.entry).toFixed(5)}</td>
                     <td style="font-family:var(--font-mono); font-size:0.75rem;">${Number(s.tp).toFixed(5)}</td>
                     <td style="font-family:var(--font-mono); font-size:0.75rem;">${Number(s.sl).toFixed(5)}</td>
-                    <td><span class="pill ${resClass}">${resultRaw}</span></td>
+                    <td style="font-family:var(--font-mono); font-weight:600; color:${pipsColor}">${pipsDisplay}</td>
                     <td style="font-family:var(--font-mono); font-size:0.7rem;">${s.closedAt}</td>
-                    <td><i data-lucide="check-circle" size="12" style="color:var(--text-secondary)"></i></td>
+                    <td><span class="pill ${resClass}" style="min-width:60px; text-align:center;">${resultRaw}</span></td>
                 `;
                 tbody.appendChild(tr);
             });
