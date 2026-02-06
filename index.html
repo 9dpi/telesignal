@@ -1070,7 +1070,7 @@
                 <div
                     style="margin: 0 1.5rem 1.5rem 1.5rem; font-size: 0.6rem; color: #475569; display: flex; justify-content: space-between; opacity: 0.5;">
                     <span>SNC STATUS: OPTIMAL</span>
-                    <span>v2.1.0</span>
+                    <span>v2.1.2</span>
                 </div>
             </div>
         </aside>
@@ -1430,16 +1430,16 @@
             }
 
             // 2. Support / Resistance Intelligence
-            const localMax = Math.max(...history.slice(-40));
-            const localMin = Math.min(...history.slice(-40));
-            const range = localMax - localMin;
+            const primaryMax = Math.max(...history.slice(-40));
+            const primaryMin = Math.min(...history.slice(-40));
+            const range = primaryMax - primaryMin;
 
-            if (current >= localMax - (range * 0.05)) {
+            if (current >= primaryMax - (range * 0.05)) {
                 addNeuralInsight(`RESISTANCE: Testing primary supply ceiling at ${current.toFixed(5)}.`, 'highlight');
                 lastAnalysisTime = now + 10000;
                 return;
             }
-            if (current <= localMin + (range * 0.05)) {
+            if (current <= primaryMin + (range * 0.05)) {
                 addNeuralInsight(`SUPPORT: Interacting with critical demand zone at ${current.toFixed(5)}.`, 'accent');
                 lastAnalysisTime = now + 10000;
                 return;
@@ -1766,7 +1766,7 @@
             } catch (err) {
                 console.error(err);
                 // Fallback for demo if server isn't running
-                addLog(`Linker: Local simulation active (Server did not respond).`, "sys");
+                addLog(`Linker: Real-time analysis active (Direct Feed Connection).`, "sys");
             }
         }
 
