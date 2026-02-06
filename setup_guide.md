@@ -16,10 +16,13 @@ Dự án sử dụng chuẩn **ES Modules (ESM)** để tương thích tốt nh�
 
 Trên Railway, bạn **bắt buộc** phải cấu hình các biến sau trong tab **Variables**:
 
-| Biến | Giá trị ví dụ | Ý nghĩa |
-| :--- | :--- | :--- |
 | `SUPABASE_URL` | `https://xxx.supabase.co` | URL kết nối database |
 | `SUPABASE_KEY` | `eyJhbGciOi...` | API Key bí mật của Supabase |
+| `EMAIL_USER` | `admin@gmail.com` | Email dùng để gửi thông báo |
+| `EMAIL_PASS` | `xxxx xxxx xxxx xxxx` | App Password của Gmail |
+| `TELEGRAM_BOT_TOKEN` | `85579...:AAHU2...` | Token từ @BotFather |
+| `TELEGRAM_ADMIN_CHAT_ID` | `7985984228` | ID cá nhân để nhận thông báo |
+| `TELEGRAM_GROUP_ID` | `-100xxxxxx` | (Tùy chọn) ID Group để cấp link mời |
 | `PORT` | `8080` (Railway tự cấp) | Cổng để server lắng nghe |
 
 ---
