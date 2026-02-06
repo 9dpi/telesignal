@@ -146,21 +146,20 @@
         /* --- Main Layout --- */
         .app-shell {
             display: grid;
-            grid-template-columns: 350px 1fr;
-            flex: 1;
+            grid-template-columns: 350px minmax(0, 1fr) 320px;
+            width: 100vw;
+            height: calc(100vh - 70px);
             overflow: hidden;
         }
 
         .sidebar {
             width: 350px;
-            border-right: 1px solid #111;
             background: #000;
             display: flex;
             flex-direction: column;
             padding: 1.5rem;
             flex-shrink: 0;
             overflow-y: auto;
-            /* Allow sidebar scrolling if needed */
         }
 
         .price-card {
@@ -742,6 +741,19 @@
         .neural-line.highlight {
             color: var(--quantix-purple);
         }
+
+        .social-link {
+            color: #475569;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .social-link:hover {
+            color: var(--quantix-accent);
+            transform: translateY(-2px);
+            filter: drop-shadow(0 0 5px var(--quantix-accent));
+        }
     </style>
 </head>
 
@@ -908,24 +920,6 @@
                 </div>
             </div>
 
-            <!-- NEW: Neural Thinking Console (The Spice) -->
-            <div id="neural-console"
-                style="margin-top:20px; background: rgba(0,0,0,0.4); border: 1px solid var(--border-subtle); border-radius: 4px; padding: 12px; font-family: var(--font-mono); display:none;">
-                <div
-                    style="display:flex; align-items:center; gap:8px; margin-bottom:8px; border-bottom:1px solid #1e293b; padding-bottom:6px;">
-                    <div class="pulse-active" style="width:6px; height:6px; animation: pulse-ring 1s infinite;"></div>
-                    <span
-                        style="font-size:0.6rem; color:var(--text-secondary); text-transform:uppercase; letter-spacing:1px;">Neural
-                        Thinking Console</span>
-                </div>
-                <div id="neural-history"
-                    style="height:80px; overflow:hidden; display:flex; flex-direction:column-reverse; gap:4px;">
-                    <!-- Thinking lines will appear here -->
-                </div>
-            </div>
-
-            </div>
-
             <div id="no-signal-view"
                 style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--text-secondary); text-align:center; padding: 2rem;">
                 <i data-lucide="radar" size="48" style="opacity: 0.2; margin-bottom: 1rem;"></i>
@@ -1027,10 +1021,59 @@
                     <div class="log-line type-sys">[SYSTEM] Initializing Quantix Log Stream...</div>
                 </div>
             </div>
-
-
-
         </section>
+
+        <aside class="right-panel"
+            style="width: 320px; border-left: 1px solid #111; background: #000; display: flex; flex-direction: column; padding: 0; flex-shrink: 0; height: 100%;">
+
+            <!-- Social Sharing & Alignment Spacer -->
+            <div
+                style="height: 48px; border-bottom: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: center; gap: 20px;">
+                <span
+                    style="font-family: var(--font-mono); font-size: 0.65rem; color: #475569; text-transform: uppercase; letter-spacing: 0.5px;">Live
+                    Stream info:</span>
+                <a href="https://www.facebook.com/sharer/sharer.php?u=https://9dpi.github.io/telesignal/"
+                    target="_blank" class="social-link" title="Share on Facebook"><i data-lucide="facebook"
+                        size="16"></i></a>
+                <a href="https://twitter.com/intent/tweet?url=https://9dpi.github.io/telesignal/&text=Check%20out%20Quantix%20Tele%20Signal%20-%20AI%20Trading%20Signals!"
+                    target="_blank" class="social-link" title="Share on X">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932 6.064-6.932zm-1.292 19.49h2.039L6.486 3.24H4.298l13.311 17.403z" />
+                    </svg>
+                </a>
+                <a href="javascript:void(0)" onclick="shareTikTok()" class="social-link" title="Copy Link for TikTok">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M12.525.02c1.31-.032 2.512.352 3.477 1.058.022.016.03.02.046.035a6.604 6.604 0 0 0 .97.697 6.476 6.476 0 0 0 2.457.854v3.633a9.924 9.924 0 0 1-4.832-1.25v10.518c0 4.636-3.758 8.394-8.394 8.394S0 20.198 0 15.562s3.758-8.394 8.394-8.394c.484 0 .95.044 1.403.125V10.97a4.704 4.704 0 0 0-1.403-.213 4.75 4.75 0 0 0-4.75 4.75 4.75 4.75 0 0 0 4.75 4.75c2.624 0 4.75-2.126 4.75-4.75V0h3.382z" />
+                    </svg>
+                </a>
+                <a href="https://www.youtube.com/channel/UChV2kQku-EY7f-hrbtJKuDA" target="_blank" class="social-link"
+                    title="Join YouTube Channel"><i data-lucide="youtube" size="16"></i></a>
+            </div>
+
+            <div id="neural-console" style="flex: 1; display: flex; flex-direction: column;">
+                <div class="section-header">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <div class="pulse-active" style="width:8px; height:8px; animation: pulse-ring 1s infinite;">
+                        </div>
+                        <span class="section-title" style="color:white;">Neural Network Feed</span>
+                    </div>
+                    <i data-lucide="brain" size="14" style="color:var(--quantix-purple)"></i>
+                </div>
+
+                <div id="neural-history"
+                    style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 1.5rem;">
+                    <!-- Thinking lines will appear here from top to bottom -->
+                </div>
+
+                <div
+                    style="margin: 0 1.5rem 1.5rem 1.5rem; font-size: 0.6rem; color: #475569; display: flex; justify-content: space-between; opacity: 0.5;">
+                    <span>SNC STATUS: OPTIMAL</span>
+                    <span>v2.1.0</span>
+                </div>
+            </div>
+        </aside>
     </main>
 
     <script>
@@ -1377,12 +1420,20 @@
             const container = document.getElementById('neural-history');
             const consoleBox = document.getElementById('neural-console');
             if (container) {
-                consoleBox.style.display = 'block';
                 const div = document.createElement('div');
                 div.className = `neural-line ${type}`;
+                div.style.fontSize = '0.7rem';
+                div.style.marginBottom = '2px';
                 div.textContent = `> ${msg}`;
-                container.prepend(div);
-                if (container.children.length > 5) container.lastElementChild.remove();
+                container.appendChild(div);
+
+                // Keep only latest 30 items
+                if (container.children.length > 30) {
+                    container.removeChild(container.firstChild);
+                }
+
+                // Auto-scroll to bottom
+                container.scrollTop = container.scrollHeight;
             }
         }
 
@@ -1442,6 +1493,14 @@
             document.getElementById('total-sigs').textContent = data.sigs.length;
             const wins = data.sigs.filter(s => s.result === 'PROFIT').length;
             document.getElementById('win-rate').textContent = data.sigs.length > 0 ? ((wins / data.sigs.length) * 100).toFixed(1) + '%' : '0.0%';
+        }
+
+        // Social Sharing Logic
+        function shareTikTok() {
+            const url = "https://9dpi.github.io/telesignal/";
+            navigator.clipboard.writeText(url).then(() => {
+                addNeuralInsight("SYSTEM: Link copied to clipboard for TikTok sharing.", "highlight");
+            });
         }
 
         // Real-time UTC Clock for Header
@@ -1680,40 +1739,7 @@
 
         addLog("Quantix AI Core Link: ACTIVE", "success");
 
-        // --- SECURITY PROTECTIONS ---
-        (function () {
-            // 1. Disable Right Click
-            document.addEventListener('contextmenu', event => event.preventDefault());
-
-            // 2. Disable Keyboard Shortcuts (F12, Ctrl+Shift+I, Ctrl+U, etc.)
-            document.onkeydown = function (e) {
-                if (e.keyCode == 123) return false; // F12
-                if (e.ctrlKey && e.shiftKey && (e.keyCode == 'I'.charCodeAt(0) || e.keyCode == 'J'.charCodeAt(0) || e.keyCode == 'C'.charCodeAt(0))) return false;
-                if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false; // View Source
-            };
-
-            // 3. Basic Debugger Trap (Deterrent for DevTools)
-            setInterval(function () {
-                const startTime = performance.now();
-                debugger;
-                const endTime = performance.now();
-                if (endTime - startTime > 100) {
-                    // If debugger paused execution, potential devtools open
-                    console.clear();
-                    document.body.innerHTML = '<div style="background:#000; color:#f00; height:100vh; display:flex; align-items:center; justify-content:center; font-family:monospace;">SECURITY ACCESS DENIED: DEVTOOLS DETECTED</div>';
-                }
-            }, 1000);
-
-            // 4. Console Protection
-            if (typeof console !== "undefined") {
-                const noop = () => { };
-                // Disable common logs in production unless you need them
-                // console.log = noop; 
-                console.warn = noop;
-                console.error = noop;
-                console.info = noop;
-            }
-        })();
+        // Security protections removed for debugging/inspection
     </script>
 </body>
 
