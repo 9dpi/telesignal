@@ -1435,12 +1435,12 @@
             const range = localMax - localMin;
 
             if (current >= localMax - (range * 0.05)) {
-                addNeuralInsight(`RESISTANCE: Testing local supply ceiling at ${current.toFixed(5)}.`, 'highlight');
+                addNeuralInsight(`RESISTANCE: Testing primary supply ceiling at ${current.toFixed(5)}.`, 'highlight');
                 lastAnalysisTime = now + 10000;
                 return;
             }
             if (current <= localMin + (range * 0.05)) {
-                addNeuralInsight(`SUPPORT: Interacting with local demand zone at ${current.toFixed(5)}.`, 'accent');
+                addNeuralInsight(`SUPPORT: Interacting with critical demand zone at ${current.toFixed(5)}.`, 'accent');
                 lastAnalysisTime = now + 10000;
                 return;
             }
