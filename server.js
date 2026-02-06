@@ -6,6 +6,7 @@ import path from 'path';
 import { createClient } from '@supabase/supabase-js';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import nodemailer from 'nodemailer';
 import 'dotenv/config';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -24,6 +25,35 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
 }
 
 const supabase = createClient(SUPABASE_URL || '', SUPABASE_KEY || '');
+
+// Email Setup (SMTP)
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS // App Password if using Gmail
+    }
+});
+
+async function sendEmailNotification(phone) {
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+        console.warn("⚠️ Email credentials missing. Skipping notification.");
+        return;
+    }
+    const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: 'vuquangcuong@gmail.com',
+        subject: '🚀 New Telegram Registration - Tele Signal',
+        text: `New registration detected:\n\nPhone: ${phone}\nTime: ${new Date().toLocaleString()}\n\nRegards,\nQuantix AI Core`
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log(`[Email] Notification sent for ${phone}`);
+    } catch (err) {
+        console.error("Email Error:", err.message);
+    }
+}
 
 // Middleware
 app.use(cors());
@@ -91,7 +121,7 @@ app.get('/api/signals', async (req, res) => {
 });
 
 // API: Register Telegram
-app.post('/api/register-telegram', (req, res) => {
+app.post('/api/register-telegram', async (req, res) => {
     const { phone } = req.body;
     if (!phone) return res.status(400).json({ success: false, message: 'Phone required' });
 
@@ -103,9 +133,13 @@ app.post('/api/register-telegram', (req, res) => {
         if (!recipients.find(r => r.phone === phone)) {
             recipients.push({ phone, timestamp: new Date().toISOString(), status: 'active' });
             fs.writeFileSync(DATA_FILE, JSON.stringify(recipients, null, 2));
+
+            // Send Email Notification
+            await sendEmailNotification(phone);
         }
         res.json({ success: true, message: 'Registered' });
     } catch (e) {
+        console.error("Registration Error:", e);
         res.status(500).json({ success: false, message: 'Storage error' });
     }
 });
