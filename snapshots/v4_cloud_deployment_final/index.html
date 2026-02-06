@@ -1,0 +1,1571 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tele Signal | Powered by Quantix AI</title>
+    <link rel="stylesheet" href="command-center.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            /* Pure Black Trading Palette - Reference Image Match */
+            --bg-base: #000000;
+            --bg-surface: #000000;
+            --bg-card: rgba(15, 23, 42, 0.4);
+            --quantix-accent: #38bdf8;
+            /* Cyan Link/Logo */
+            --quantix-purple: #a855f7;
+            /* Purple Logo Suffix */
+            --trade-up: #38bdf8;
+            /* Matches blue accent */
+            --trade-down: #f43f5e;
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            --border-subtle: #1e293b;
+            --font-main: 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg-base);
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            user-select: none;
+            /* Disable text selection */
+            -webkit-user-select: none;
+            -ms-user-select: none;
+        }
+
+        img {
+            pointer-events: none;
+            /* Disable image dragging/saving */
+        }
+
+        .header-strip {
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            border-bottom: 1px solid #0f172a;
+            background: #000;
+            z-index: 100;
+        }
+
+        .brand-zone {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-logo {
+            color: var(--quantix-accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .brand-name {
+            font-weight: 800;
+            letter-spacing: -1px;
+            font-size: 1.25rem;
+            text-transform: uppercase;
+            display: flex;
+            gap: 6px;
+        }
+
+        .name-prefix {
+            color: #fff;
+        }
+
+        .name-suffix {
+            color: var(--quantix-purple);
+        }
+
+        .powered-by {
+            font-size: 0.6rem;
+            color: #475569;
+            font-weight: 500;
+            text-transform: none;
+            letter-spacing: 0.5px;
+            margin-left: 4px;
+            align-self: center;
+            font-family: var(--font-mono);
+            border-left: 1px solid #1e293b;
+            padding-left: 10px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--quantix-accent);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .nav-link:hover {
+            filter: brightness(1.3);
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .stat-label {
+            font-size: 0.6rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 0.95rem;
+            font-family: var(--font-mono);
+            font-weight: 700;
+            color: var(--quantix-accent);
+        }
+
+        /* --- Main Layout --- */
+        .app-shell {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 350px;
+            border-right: 1px solid #111;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+            flex-shrink: 0;
+            overflow-y: auto;
+            /* Allow sidebar scrolling if needed */
+        }
+
+        .price-card {
+            padding: 2rem;
+            background: #050505;
+            border: 1px solid #111;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .current-price {
+            font-size: 2.8rem;
+            font-family: var(--font-mono);
+            font-weight: 800;
+            letter-spacing: -1.5px;
+            color: #fff;
+        }
+
+
+        /* --- Viewport & Grid --- */
+        .viewport {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* One-Click Trading Panel */
+        .quick-trade-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px;
+            background: #0f172a;
+            border: 1px solid var(--border-subtle);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .trade-btn {
+            padding: 12px 6px;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            transition: opacity 0.2s;
+        }
+
+        .trade-btn.sell {
+            background: var(--trade-down);
+            color: white;
+        }
+
+        .trade-btn.buy {
+            background: var(--trade-up);
+            color: white;
+        }
+
+        .trade-btn:hover {
+            opacity: 0.9;
+        }
+
+        .trade-btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-label {
+            font-size: 0.6rem;
+            font-weight: 800;
+            opacity: 0.8;
+        }
+
+        .btn-price {
+            font-size: 0.9rem;
+            font-family: var(--font-mono);
+            font-weight: 700;
+        }
+
+        .lot-input-wrapper {
+            grid-column: span 2;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px;
+            border-top: 1px solid var(--border-subtle);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .lot-input {
+            background: transparent;
+            border: none;
+            color: var(--quantix-accent);
+            width: 50px;
+            text-align: center;
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 0.85rem;
+            outline: none;
+        }
+
+        /* Workspace Flex Layout */
+        .workspace-grid {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* Top Section (Table) takes remaining space */
+        .workspace-grid>.section-container:first-child {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .section-container {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .section-divider {
+            border-left: 1px solid var(--border-subtle);
+        }
+
+        .section-header {
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .section-title {
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .content-scroller {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        /* Table Reset */
+        table {
+            width: 98%;
+            margin: 0 auto;
+            /* Center the table */
+            min-width: 1000px;
+            /* Ensure table has breathing room */
+            border-collapse: collapse;
+            table-layout: fixed;
+            /* Force column widths */
+        }
+
+        th {
+            text-align: left;
+            padding: 0.85rem 1.5rem;
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-weight: 700;
+            border-bottom: 1px solid var(--border-subtle);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Column Widths Definition (10 columns total) */
+        th:nth-child(1) {
+            width: 80px;
+        }
+
+        /* ID */
+        th:nth-child(2) {
+            width: 90px;
+        }
+
+        /* Created */
+        th:nth-child(3) {
+            width: 70px;
+        }
+
+        /* Side */
+        th:nth-child(4) {
+            width: 80px;
+        }
+
+        /* AI Score */
+        th:nth-child(5) {
+            width: 100px;
+        }
+
+        /* Entry */
+        th:nth-child(6) {
+            width: 100px;
+        }
+
+        /* TP */
+        th:nth-child(7) {
+            width: 100px;
+        }
+
+        /* SL */
+        th:nth-child(8) {
+            width: 110px;
+        }
+
+        /* Win/Loss */
+        th:nth-child(9) {
+            width: 90px;
+        }
+
+        /* Closed */
+        th:nth-child(10) {
+            width: 120px;
+        }
+
+        /* Status */
+
+        /* Shift Status Column left and remove ellipsis */
+        th:nth-child(10),
+        td:nth-child(10) {
+            padding-left: 0.5rem;
+            /* Reduced from 1.5rem to shift left */
+            overflow: visible;
+            text-overflow: clip;
+        }
+
+        td {
+            padding: 1.1rem 1.5rem;
+            font-size: 0.8rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Terminal Logs Minimal */
+        .terminal-container {
+            padding: 1.5rem;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            line-height: 1.6;
+            color: #64748b;
+            overflow-y: auto;
+            flex: 1;
+            background: #000;
+        }
+
+        .log-line {
+            margin-bottom: 6px;
+            white-space: pre-wrap;
+            border-left: 2px solid transparent;
+            padding-left: 10px;
+        }
+
+        .log-line.type-sys {
+            border-left-color: #334155;
+        }
+
+        .log-line.type-success {
+            border-left-color: var(--trade-up);
+            color: #e2e8f0;
+        }
+
+        .log-line.type-danger {
+            border-left-color: var(--trade-down);
+            color: #fecaca;
+        }
+
+        .log-line.type-warning {
+            border-left-color: #eab308;
+        }
+
+        .log-msg {
+            color: #cbd5e1;
+        }
+
+        .log-line.type-success .log-msg {
+            color: #fff;
+        }
+
+        .tab-content {
+            display: none;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .tab-content.active {
+            display: flex;
+        }
+
+        /* Audit & Stats Grid */
+        .audit-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .audit-card {
+            background: rgba(15, 23, 42, 0.2);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 1.25rem;
+        }
+
+        .audit-val {
+            font-size: 1.5rem;
+            font-family: var(--font-mono);
+            font-weight: 700;
+            color: var(--quantix-accent);
+            margin-top: 8px;
+        }
+
+        .net-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            font-size: 0.8rem;
+        }
+
+        .pulse {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--trade-up);
+            box-shadow: 0 0 8px var(--trade-up);
+        }
+
+        /* Navigation Reset */
+        .sub-tabs {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.5rem;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .tab-btn {
+            padding: 1rem 1.5rem;
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: #475569;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: 0.2s;
+        }
+
+        .tab-btn.active {
+            color: var(--quantix-accent);
+            border-bottom-color: var(--quantix-accent);
+        }
+
+        .tab-btn:hover:not(.active) {
+            color: #fff;
+        }
+
+        /* Action Buttons */
+        .btn-main {
+            background: var(--quantix-accent);
+            color: #000;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 4px;
+            font-weight: 800;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-main:hover {
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.4);
+            transform: translateY(-1px);
+        }
+
+        /* Telegram Connector */
+        .tg-connector {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .tg-input-group {
+            display: flex;
+            background: #000;
+            border: 1px solid var(--border-subtle);
+            border-radius: 4px;
+            padding: 2px;
+            flex: 1;
+            max-width: 350px;
+        }
+
+        .tg-input {
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            padding: 6px 12px;
+            font-size: 0.75rem;
+            font-family: var(--font-mono);
+            outline: none;
+            flex: 1;
+        }
+
+        .tg-input::placeholder {
+            color: #475569;
+        }
+
+        .tg-btn {
+            background: var(--quantix-accent);
+            color: #000;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 2px;
+            font-size: 0.65rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .tg-btn:hover {
+            filter: brightness(1.2);
+        }
+
+        .pill {
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.65rem;
+            font-weight: 800;
+        }
+
+        .pill.up {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--trade-up);
+        }
+
+        .pill.down {
+            background: rgba(244, 63, 94, 0.1);
+            color: var(--trade-down);
+        }
+
+        /* Risk Group */
+        .risk-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            background: #0f172a;
+            border-radius: 4px;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .risk-val {
+            font-family: var(--font-mono);
+            font-weight: 700;
+            color: white;
+            width: 30px;
+            text-align: center;
+        }
+
+        .risk-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0 5px;
+        }
+
+        /* Signal Template Refinement */
+        .signal-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 6px;
+        }
+
+        .pulse-active {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--trade-up);
+            box-shadow: 0 0 10px var(--trade-up);
+            animation: pulse-ring 2s infinite;
+        }
+
+        .pulse-scanning {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #eab308;
+            box-shadow: 0 0 10px #eab308;
+            animation: pulse-ring 1.5s infinite;
+        }
+
+        @keyframes pulse-ring {
+            0% {
+                transform: scale(0.95);
+                opacity: 0.8;
+            }
+
+            50% {
+                transform: scale(1.1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(0.95);
+                opacity: 0.8;
+            }
+        }
+
+        .sig-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .sig-value {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .sig-value.mono {
+            font-family: var(--font-mono);
+            letter-spacing: -0.5px;
+        }
+
+        .sig-section {
+            padding: 12px 0;
+            border-top: 1px solid var(--border-subtle);
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header-strip">
+        <div class="brand-zone">
+            <div class="brand-logo">
+                <i data-lucide="atom" size="28"></i>
+            </div>
+            <div class="brand-name">
+                <span class="name-prefix">TELE</span>
+                <span class="name-suffix">SIGNAL</span>
+                <span class="powered-by">[Powered by Quantix AI Core]</span>
+            </div>
+        </div>
+
+        <div class="nav-links">
+            <a href="https://9dpi.github.io/quantix-ai-core/index.html" target="_blank" class="nav-link">Overview</a>
+            <a href="#" class="nav-link" style="color:#fff">Live System</a>
+
+            <a href="https://9dpi.github.io/quantix-ai-core/api/index.html" target="_blank" class="nav-link">API</a>
+            <a href="https://9dpi.github.io/quantix-ai-core/contact/index.html" target="_blank"
+                class="nav-link">Contact</a>
+            <a href="https://9dpi.github.io/quantix-ai-core/disclaimer/index.html" target="_blank"
+                class="nav-link">Legal</a>
+        </div>
+    </header>
+
+    <main class="app-shell">
+        <aside class="sidebar" id="sidebar-content">
+            <!-- Sidebar Header / Price Card -->
+            <div class="price-card">
+                <div
+                    style="display:flex; justify-content:space-between; font-size:0.7rem; color:var(--text-secondary); font-weight:700; align-items:center;">
+                    <span>EUR / USD</span>
+                    <div style="display:flex; align-items:center; gap:6px;">
+                        <div id="connection-pulse" class="pulse-scanning"></div>
+                        <span id="connection-status" style="color:var(--text-primary)">INITIALIZING</span>
+                    </div>
+                </div>
+                <div class="current-price" id="price-main">--.-----</div>
+                <div style="height: 30px; margin-top: 5px;">
+                    <svg id="spark" width="100%" height="30"
+                        style="stroke: var(--quantix-accent); fill: none; stroke-width: 2;"></svg>
+                </div>
+            </div>
+
+            <!-- Signal Template Container -->
+            <div id="signal-view"
+                style="display:none; flex-direction:column; background:rgba(15, 23, 42, 0.2); border:1px solid var(--border-subtle); border-radius:8px; padding:1.5rem;">
+                <div class="card-header">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <i data-lucide="brain-circuit" size="20" style="color:var(--quantix-accent)"></i>
+                        <span class="card-title" style="letter-spacing:1px; color:white;">QUANTIX AI PREDICTION</span>
+                    </div>
+                    <div class="pulse-active"></div>
+                </div>
+
+                <div
+                    style="margin-top:4px; margin-bottom: 20px; font-family:var(--font-mono); font-size:0.65rem; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.5px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 12px;">
+                    <i data-lucide="zap" size="10" style="margin-right:4px;"></i> Pre-Market Structure Analysis
+                </div>
+
+                <div class="sig-section" style="border-top:none; padding-top:0;">
+                    <div class="signal-row">
+                        <span class="sig-label">Asset:</span>
+                        <span class="sig-value">EURUSD</span>
+                    </div>
+                    <div class="signal-row">
+                        <span class="sig-label">Timeframe:</span>
+                        <span class="sig-value">M15</span>
+                    </div>
+                    <div class="signal-row">
+                        <span class="sig-label">Direction:</span>
+                        <span id="view-dir" class="sig-value"></span>
+                    </div>
+                </div>
+
+                <div class="sig-section">
+                    <div class="signal-row" style="margin-bottom:12px;">
+                        <span class="sig-label">Status:</span>
+                        <span id="view-status" class="sig-value" style="color:var(--quantix-accent)"></span>
+                    </div>
+                    <div class="signal-row">
+                        <span class="sig-label">Entry Price:</span>
+                        <span id="view-entry" class="sig-value mono"></span>
+                    </div>
+                    <div class="signal-row">
+                        <span class="sig-label">Take Profit:</span>
+                        <span id="view-tp" class="sig-value mono" style="color:var(--trade-up)"></span>
+                    </div>
+                    <div class="signal-row">
+                        <span class="sig-label">Stop Loss:</span>
+                        <span id="view-sl" class="sig-value mono" style="color:var(--trade-down)"></span>
+                    </div>
+                </div>
+
+                <div class="sig-section">
+                    <div class="signal-row">
+                        <div class="data-label">AI Probability</div>
+                        <span id="view-conf" class="sig-value" style="color:var(--quantix-accent)"></span>
+                    </div>
+                    <div class="signal-row">
+                        <span class="sig-label">Valid Until:</span>
+                        <span id="view-valid" class="sig-value"></span>
+                    </div>
+                </div>
+
+                <div class="sig-section" style="border-bottom:none; padding-bottom:0;">
+                    <div style="font-size: 0.7rem; color: var(--text-secondary); line-height: 1.8; margin-bottom:12px;">
+                        <div style="display:flex; align-items:center; gap:6px;">⏱️ <span style="flex:1">Entry
+                                valid:</span> <b style="color:white">15m</b></div>
+                        <div style="display:flex; align-items:center; gap:6px;">⏱️ <span style="flex:1">Max trade
+                                duration:</span> <b style="color:white">35m</b></div>
+                    </div>
+
+                    <div
+                        style="font-size: 0.65rem; color: #64748b; font-style: italic; line-height: 1.4; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 4px; border-left: 2px solid var(--border-subtle);">
+                        ⚠️ Signal will auto-close if TP/SL not hit within 35m.
+                    </div>
+                    <div
+                        style="margin-top:12px; font-family:var(--font-mono); font-size:0.6rem; color:#334155; text-align:right;">
+                        Generated by Quantix Core v2.1 • <span style="color:var(--quantix-accent)">Live</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NEW: Live Trade Progress Bar -->
+            <div id="trade-progress-container"
+                style="display:none; margin-top:15px; padding-top:10px; border-top:1px solid var(--border-subtle);">
+                <div
+                    style="display:flex; justify-content:space-between; font-size:0.65rem; color:var(--text-secondary); margin-bottom:4px; font-family:var(--font-mono);">
+                    <span>SL</span>
+                    <span id="live-pnl-text" style="font-weight:bold;">NEUTRAL</span>
+                    <span>TP</span>
+                </div>
+                <div
+                    style="position:relative; height:6px; background:rgba(255,255,255,0.1); border-radius:3px; width:100%;">
+                    <!-- Entry Marker -->
+                    <div id="entry-marker"
+                        style="position:absolute; top:-2px; bottom:-2px; width:2px; background:white; opacity:0.5; z-index:1;">
+                    </div>
+                    <!-- Progress Fill -->
+                    <div id="tp-bar-fill"
+                        style="position:absolute; left:0; top:0; height:100%; border-radius:3px; background:var(--trade-up); width:0%; transition: width 0.3s ease, background 0.3s;">
+                    </div>
+                    <!-- Current Price Marker -->
+                    <div id="price-marker"
+                        style="position:absolute; top:-4px; width:8px; height:14px; background:white; border-radius:2px; transform:translateX(-50%); box-shadow:0 0 5px rgba(255,255,255,0.5); z-index:2; transition: left 0.3s ease;">
+                    </div>
+                </div>
+            </div>
+
+            </div>
+
+            <div id="no-signal-view"
+                style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--text-secondary); text-align:center; padding: 2rem;">
+                <i data-lucide="radar" size="48" style="opacity: 0.2; margin-bottom: 1rem;"></i>
+                <div id="scanning-text" style="font-size: 0.8rem; font-weight: 500;">Initializing Quantix Network...
+                </div>
+            </div>
+        </aside>
+
+        <section class="viewport">
+            <nav class="sub-tabs">
+                <div style="display:flex; gap: 4px;">
+                    <div class="tab-btn active" onclick="switchTab('terminal', this)">Execution Terminal</div>
+                    <div class="tab-btn" onclick="switchTab('logs', this)">Execution Logs</div>
+                </div>
+                <div class="tg-connector">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <i data-lucide="send" size="14" style="color:var(--quantix-accent)"></i>
+                        <div style="font-size: 0.7rem; font-weight: 600; color: var(--text-secondary);">Recipients:
+                        </div>
+                    </div>
+                    <div class="tg-input-group">
+                        <input type="text" class="tg-input" style="width: 240px;"
+                            placeholder="Enter Telegram to get Signals" id="tg-phone">
+                        <button class="tg-btn" onclick="connectTelegram()">CONNECT</button>
+                    </div>
+                </div>
+            </nav>
+
+            <div id="tab-terminal" class="tab-content active">
+                <div class="workspace-grid">
+                    <!-- Executions -->
+                    <div class="section-container">
+                        <div class="section-header">
+                            <div class="section-title">Live Executions</div>
+                            <i data-lucide="activity" size="14" style="color:var(--text-secondary)"></i>
+                        </div>
+                        <div class="content-scroller">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Created</th>
+                                        <th>Side</th>
+                                        <th>AI Score</th>
+                                        <th>Entry</th>
+                                        <th>TP</th>
+                                        <th>SL</th>
+                                        <th>Win/Loss</th>
+                                        <th>Closed</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="signal-history"></tbody>
+                            </table>
+                        </div>
+                        <!-- Pagination Controls -->
+                        <div
+                            style="display:flex; justify-content:space-between; align-items:center; padding: 10px 16px; border-top: 1px solid var(--border-subtle);">
+                            <div
+                                style="font-size: 0.75rem; color: var(--text-secondary); font-family: var(--font-mono);">
+                                Page <span id="page-num" style="color:white">1</span> / <span id="total-pages">1</span>
+                            </div>
+                            <div style="display:flex; gap:8px;">
+                                <button id="btn-prev" onclick="changePage(-1)"
+                                    style="background:var(--bg-card); border:1px solid var(--border-subtle); color:var(--text-primary); padding:4px 8px; border-radius:4px; cursor:pointer; font-size:0.75rem;"
+                                    disabled>&lt; Prev</button>
+                                <button id="btn-next" onclick="changePage(1)"
+                                    style="background:var(--bg-card); border:1px solid var(--border-subtle); color:var(--text-primary); padding:4px 8px; border-radius:4px; cursor:pointer; font-size:0.75rem;">Next
+                                    &gt;</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- App Footer -->
+                    <footer
+                        style="padding: 1.5rem 0; border-top: 1px solid var(--border-subtle); margin-top: auto; text-align: center;">
+                        <div style="font-family: var(--font-mono); font-size: 0.7rem; color: #475569;">
+                            &copy; 2026 QUANTIX AI CORE. All systems nominal.
+                        </div>
+                        <div style="margin-top: 6px; display: flex; justify-content: center; gap: 16px;">
+                            <a href="#"
+                                style="color: var(--text-secondary); font-size: 0.65rem; text-decoration: none;">Terms
+                                of Service</a>
+                            <a href="#"
+                                style="color: var(--text-secondary); font-size: 0.65rem; text-decoration: none;">Privacy
+                                Policy</a>
+                            <a href="#"
+                                style="color: var(--text-secondary); font-size: 0.65rem; text-decoration: none;">API
+                                Status</a>
+                        </div>
+                    </footer>
+                </div>
+            </div>
+
+            <div id="tab-logs" class="tab-content">
+                <div class="terminal-container" id="terminal-logs">
+                    <div class="log-line type-sys">[SYSTEM] Initializing Quantix Log Stream...</div>
+                </div>
+            </div>
+
+
+
+        </section>
+    </main>
+
+    <script>
+        let data = {
+            price: null,
+            prevPrice: 0,
+            sigs: [],
+            pHistory: [],
+            active: null,
+            currentPage: 1,
+            itemsPerPage: 10
+        };
+
+        const terminal = document.getElementById('terminal');
+        const priceEl = document.getElementById('price-main');
+
+        function switchTab(id, btn) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById(`tab-${id}`).classList.add('active');
+        }
+
+        function addLog(msg, type = 'sys') {
+            const container = document.getElementById('terminal-logs');
+            if (container) {
+                const div = document.createElement('div');
+                div.className = `log-line type-${type}`;
+                div.innerHTML = `<span style="color:#475569">[${new Date().toLocaleTimeString()}]</span> <span class="log-msg">${msg}</span>`;
+                container.appendChild(div);
+                container.scrollTop = container.scrollHeight;
+
+                // Limit logs to last 100 lines
+                if (container.children.length > 100) {
+                    container.removeChild(container.firstChild);
+                }
+            }
+        }
+
+        function calcConfidence(val) {
+            if (val === undefined || val === null) return 0;
+            // If strict decimal <= 1, multiply by 100.
+            // e.g. 0.6 -> 60, 0.95 -> 95
+            if (val <= 1) return Math.round(val * 100);
+            // If already > 1, assume percentage
+            // e.g. 85 -> 85
+            return Math.round(val);
+        }
+
+        // CONFIG: Railway Backend API
+        const API_BASE = 'https://telesignal-production.up.railway.app';
+
+        async function syncDatabase() {
+            try {
+                // Add timeout to prevent hanging
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+                const res = await fetch(`${API_BASE}/api/signals`, {
+                    signal: controller.signal,
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                clearTimeout(timeoutId);
+
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                }
+
+                const json = await res.json();
+                if (!json.success) throw new Error(json.message);
+
+                if (json.active) {
+                    const s = json.active;
+                    const isNew = !data.active || data.active.id !== s.id;
+                    data.active = {
+                        id: s.id,
+                        side: s.direction || s.side,
+                        entry: s.entry_price || s.entry,
+                        tp: s.take_profit || s.tp,
+                        sl: s.stop_loss || s.sl,
+                        status: s.status,
+                        conf: calcConfidence(s.ai_confidence || s.release_confidence || s.confidence || s.conf),
+                        generatedAt: s.generated_at ? new Date(s.generated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--',
+                        closedAt: s.closed_at ? new Date(s.closed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--',
+                        validUntil: s.valid_until ? new Date(s.valid_until).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--'
+                    };
+                    if (isNew) addLog(`Sync: New live signal detected #${s.id}`, 'success');
+                } else {
+                    data.active = null;
+                }
+
+                data.sigs = json.history.map(s => ({
+                    id: s.id,
+                    side: s.direction || s.side,
+                    entry: s.entry_price || s.entry,
+                    tp: s.take_profit || s.tp,
+                    sl: s.stop_loss || s.sl,
+                    result: s.result || 'UNKNOWN',
+                    status: s.status,
+                    conf: calcConfidence(s.ai_confidence || s.release_confidence || s.confidence || s.conf),
+                    generatedAt: s.generated_at ? new Date(s.generated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--',
+                    closedAt: s.closed_at ? new Date(s.closed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--'
+                }));
+
+                renderSignalView();
+                renderTable();
+            } catch (err) {
+                console.error("DB Sync Error:", err);
+
+                let errMsg = 'Unknown error';
+                if (err.name === 'AbortError') {
+                    errMsg = 'Request timeout (Railway may be sleeping)';
+                } else if (err.message.includes('Failed to fetch')) {
+                    errMsg = 'Network error (CORS or Railway offline)';
+                } else {
+                    errMsg = err.message || JSON.stringify(err);
+                }
+
+                document.getElementById('connection-status').textContent = "DISCONNECTED";
+                document.getElementById('connection-status').style.color = "var(--trade-down)";
+                document.getElementById('connection-pulse').className = "pulse";
+                document.getElementById('connection-pulse').style.background = "var(--trade-down)";
+                document.getElementById('connection-pulse').style.boxShadow = "none";
+
+                addLog(`Linker Error: ${errMsg}`, "danger");
+            }
+        }
+
+        function updateConnectionUI(status, activeSignal = null) {
+            const statusEl = document.getElementById('connection-status');
+            const pulseEl = document.getElementById('connection-pulse');
+            const scanText = document.getElementById('scanning-text');
+
+            if (status === 'active') {
+                statusEl.textContent = "LIVE DATA";
+                statusEl.style.color = "var(--trade-up)";
+                pulseEl.className = "pulse-active";
+
+                // Added success log for connection
+                if (!window.hasLoggedSuccess) {
+                    addLog("Connecting Tele Signal: Success", "success");
+                    window.hasLoggedSuccess = true;
+                }
+
+                if (activeSignal) {
+                    // Show latest active signal
+                    scanText.innerHTML = `
+                        <span style="color:var(--text-secondary)">Active Signal:</span> 
+                        <span style="color:var(--quantix-accent)">#${activeSignal.id.slice(0, 4)}</span> 
+                        <span style="margin:0 4px; color:#334155;">|</span>
+                        <span style="color:${activeSignal.side === 'BUY' ? 'var(--trade-up)' : 'var(--trade-down)'}">${activeSignal.side}</span>
+                        <span style="margin-left:4px; font-family:var(--font-mono)">${Number(activeSignal.entry).toFixed(5)}</span>
+                    `;
+                } else if (data.sigs && data.sigs.length > 0) {
+                    // Show last historical signal
+                    const lastSig = data.sigs[0];
+                    let statusColor = '#94a3b8';
+                    if (lastSig.result === 'PROFIT') statusColor = 'var(--trade-up)';
+                    if (lastSig.result === 'LOSS') statusColor = 'var(--trade-down)';
+
+                    scanText.innerHTML = `
+                        <span style="color:var(--text-secondary)">Last Signal:</span> 
+                        <span style="color:#cbd5e1">#${lastSig.id.slice(0, 4)}</span> 
+                        <span style="margin:0 4px; color:#334155;">|</span>
+                        <span style="color:${statusColor}; font-weight:600;">${lastSig.result || lastSig.status}</span>
+                        <span style="margin-left:4px; font-family:var(--font-mono); color:#64748b">${Number(lastSig.entry).toFixed(5)}</span>
+                    `;
+                } else {
+                    scanText.textContent = "Monitoring Quantix Network Channel...";
+                }
+
+            } else if (status === 'scanning') {
+                statusEl.textContent = "SYNCHRONIZING";
+                statusEl.style.color = "#eab308";
+                pulseEl.className = "pulse-scanning";
+                if (scanText && !data.active) scanText.textContent = "Scanning for new signals...";
+            }
+        }
+
+        function renderSignalView() {
+            const sigView = document.getElementById('signal-view');
+            const noSigView = document.getElementById('no-signal-view');
+
+            // Determine which signal to show: Active > Last History > None
+            let displaySig = data.active;
+            let isHistorical = false;
+
+            if (!displaySig && data.sigs.length > 0) {
+                displaySig = data.sigs[0];
+                isHistorical = true;
+            }
+
+            if (!displaySig) {
+                sigView.style.display = 'none';
+                noSigView.style.display = 'flex';
+                return;
+            }
+
+            sigView.style.display = 'flex';
+            noSigView.style.display = 'none';
+
+            // Populate View
+            document.getElementById('view-dir').innerHTML = displaySig.side === 'BUY' ? '🟢 BUY' : '🔴 SELL';
+            document.getElementById('view-dir').style.color = displaySig.side === 'BUY' ? 'var(--trade-up)' : 'var(--trade-down)';
+
+            // Status Logic
+            const statusEl = document.getElementById('view-status');
+            statusEl.textContent = displaySig.status;
+            if (isHistorical) {
+                statusEl.style.color = displaySig.result === 'PROFIT' ? 'var(--trade-up)' : (displaySig.result === 'LOSS' ? 'var(--trade-down)' : 'var(--text-secondary)');
+            } else {
+                statusEl.style.color = 'var(--quantix-accent)';
+            }
+
+            document.getElementById('view-entry').textContent = Number(displaySig.entry).toFixed(5);
+            document.getElementById('view-tp').textContent = Number(displaySig.tp).toFixed(5);
+            document.getElementById('view-sl').textContent = Number(displaySig.sl).toFixed(5);
+            document.getElementById('view-conf').textContent = `${displaySig.conf}%`;
+
+            // Valid Until might not be in historical objects, handle gracefully
+            const validTime = displaySig.validUntil || displaySig.closedAt || '--:--';
+            document.getElementById('view-valid').textContent = validTime;
+
+            // --- LIVE PROGRESS VISUALIZER ---
+            // Only show logic if we have valid numerical params and data.price is available
+            const progressContainer = document.getElementById('trade-progress-container');
+            if (data.active && data.price && !isHistorical && displaySig.status === 'ACTIVE') {
+                progressContainer.style.display = 'block';
+
+                const entry = parseFloat(displaySig.entry);
+                const tp = parseFloat(displaySig.tp);
+                const sl = parseFloat(displaySig.sl);
+                const current = data.price;
+                const side = displaySig.side;
+
+                // Calculate total range (SL <-> TP distance)
+                // For normalization: 0% = SL, 100% = TP
+                // But wait, for visual balance, let's map: 
+                // 0% = SL, 50% = Entry, 100% = TP? No, distance is asymmetric.
+                // Let's us simple linear mapping between SL and TP.
+
+                let totalDist, distFromSL;
+
+                if (side === 'BUY') {
+                    totalDist = tp - sl;
+                    distFromSL = current - sl;
+                } else { // SELL: SL is higher than TP
+                    totalDist = sl - tp;
+                    distFromSL = sl - current; // price going down means moving away from SL (up in profit)
+                }
+
+                // % Progress from SL (0%) to TP (100%)
+                let pct = (distFromSL / totalDist) * 100;
+                pct = Math.max(0, Math.min(100, pct)); // Clamp 0-100
+
+                // Visual Setup
+                const barFill = document.getElementById('tp-bar-fill');
+                const marker = document.getElementById('price-marker');
+                const pnlText = document.getElementById('live-pnl-text');
+
+                barFill.style.width = `${pct}%`;
+                marker.style.left = `${pct}%`;
+
+                // PnL Color Logic
+                // Entry point relative position
+                // BUY: Entry > SL. SELL: Entry < SL. 
+                // Let's calculate Entry % position
+                let entryPct;
+                if (side === 'BUY') entryPct = ((entry - sl) / totalDist) * 100;
+                else entryPct = ((sl - entry) / totalDist) * 100;
+
+                document.getElementById('entry-marker').style.left = `${entryPct}%`;
+
+                if (pct > entryPct) {
+                    // Winning Zone
+                    barFill.style.background = 'linear-gradient(90deg, var(--trade-up) 0%, #10b981 100%)';
+                    barFill.style.boxShadow = '0 0 10px rgba(16, 185, 129, 0.4)';
+                    pnlText.style.color = 'var(--trade-up)';
+                    pnlText.textContent = 'PROFIT ZONE';
+                } else {
+                    // Losing Zone
+                    barFill.style.background = 'linear-gradient(90deg, #ef4444 0%, var(--trade-down) 100%)';
+                    barFill.style.boxShadow = '0 0 10px rgba(239, 68, 68, 0.4)';
+                    pnlText.style.color = 'var(--trade-down)';
+                    pnlText.textContent = 'DRAWDOWN';
+                }
+
+            } else {
+                progressContainer.style.display = 'none';
+            }
+        }
+
+        // --- Real-time Price Feed (Binance WebSocket) ---
+        function initPriceFeed() {
+            const socket = new WebSocket('wss://stream.binance.com:9443/ws/eurusdt@trade');
+
+            socket.onmessage = (event) => {
+                const trade = JSON.parse(event.data);
+                const price = parseFloat(trade.p);
+
+                data.price = price;
+                data.pHistory.push(price);
+                if (data.pHistory.length > 50) data.pHistory.shift(); // Keep last 50 ticks
+
+                if (data.pHistory.length > 50) data.pHistory.shift(); // Keep last 50 ticks
+
+                updateUI();
+                // Trigger visual update for progress bar and table continuously
+                renderSignalView();
+                renderTable();
+            };
+
+            socket.onerror = (error) => {
+                console.warn("Pricing Feed Error:", error);
+                // Fallback will keep running random sim if socket fails, but we want real data primarily
+            };
+        }
+
+        function updateUI() {
+            if (!data.price || data.price === 1.08450) return; // Wait for real data
+
+            priceEl.textContent = data.price.toFixed(5);
+            const bid = document.getElementById('bid-price');
+            const ask = document.getElementById('ask-price');
+            if (bid && ask) {
+                bid.textContent = (data.price - 0.0001).toFixed(5); // Est Spread
+                ask.textContent = (data.price + 0.0001).toFixed(5);
+            }
+            priceEl.style.color = data.price > data.prevPrice ? 'var(--trade-up)' : (data.price < data.prevPrice ? 'var(--trade-down)' : 'white');
+            data.prevPrice = data.price;
+
+            const svg = document.getElementById('spark');
+            const min = Math.min(...data.pHistory), max = Math.max(...data.pHistory);
+            const range = (max - min) || 0.0001;
+            const pts = data.pHistory.map((v, i) => `${(i / 29) * svg.clientWidth},${30 - ((v - min) / range) * 25}`).join(' ');
+            svg.innerHTML = `<polyline points="${pts}" />`;
+
+            document.getElementById('total-sigs').textContent = data.sigs.length;
+            const wins = data.sigs.filter(s => s.result === 'PROFIT').length;
+            document.getElementById('win-rate').textContent = data.sigs.length > 0 ? ((wins / data.sigs.length) * 100).toFixed(1) + '%' : '0.0%';
+        }
+
+        function getStatusLabel(s, currentPrice = null) {
+            if (!s) return '--';
+            const status = (s.status || '').toUpperCase();
+            const result = (s.result || '').toUpperCase();
+            const side = (s.side || '').toUpperCase();
+
+            // 1. Check for real-time hits if signal is active/waiting
+            if (currentPrice && (status === 'WAITING' || status === 'WAITING_FOR_ENTRY' || status === 'ACTIVE' || status === 'ENTRY_HIT')) {
+                const entry = parseFloat(s.entry);
+                const tp = parseFloat(s.tp);
+                const sl = parseFloat(s.sl);
+
+                if (side === 'BUY') {
+                    if (currentPrice >= tp) return 'TP Hit';
+                    if (currentPrice <= sl) return 'SL Hit';
+                    if (currentPrice >= entry || status === 'ACTIVE' || status === 'ENTRY_HIT') return 'Entry Hit';
+                } else if (side === 'SELL') {
+                    if (currentPrice <= tp) return 'TP Hit';
+                    if (currentPrice >= sl) return 'SL Hit';
+                    if (currentPrice <= entry || status === 'ACTIVE' || status === 'ENTRY_HIT') return 'Entry Hit';
+                }
+            }
+
+            // 2. Map final results
+            if (result === 'PROFIT') return 'TP Hit';
+            if (result === 'LOSS') return 'SL Hit';
+
+            // 3. Map transitions
+            if (status === 'ACTIVE' || status === 'ENTRY_HIT') return 'Entry Hit';
+            if (status === 'WAITING' || status === 'WAITING_FOR_ENTRY') return 'Waiting...';
+
+            return 'Closed';
+        }
+
+        function getPipsInfo(s, currentPrice = null) {
+            const entry = parseFloat(s.entry);
+            const tp = parseFloat(s.tp);
+            const sl = parseFloat(s.sl);
+            const side = (s.side || '').toUpperCase();
+            const result = (s.result || '').toUpperCase();
+            const status = (s.status || '').toUpperCase();
+
+            let dist = 0;
+            let label = '--';
+            let color = 'var(--text-secondary)';
+
+            if (result === 'PROFIT') {
+                dist = Math.abs(entry - tp);
+                label = `+${Math.round(dist * 10000 * 10) / 10} pips`;
+                color = 'var(--trade-up)';
+            } else if (result === 'LOSS') {
+                dist = -Math.abs(entry - sl); // Loss is negative
+                label = `${Math.round(dist * 10000 * 10) / 10} pips`;
+                color = 'var(--trade-down)';
+            } else if (currentPrice && (status === 'ACTIVE' || status === 'ENTRY_HIT')) {
+                // Live pips
+                dist = side === 'BUY' ? (currentPrice - entry) : (entry - currentPrice);
+                const pips = Math.round(dist * 10000 * 10) / 10;
+                label = `${pips > 0 ? '+' : ''}${pips} pips`;
+                color = pips >= 0 ? 'var(--trade-up)' : 'var(--trade-down)';
+            }
+
+            return { label, color };
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('signal-history');
+            tbody.innerHTML = '';
+            const cPrice = data.price;
+
+            if (data.active) {
+                const tr = document.createElement('tr');
+                tr.style.background = 'rgba(56, 189, 248, 0.05)';
+                let confDisplay = data.active.conf > 0 ? `${data.active.conf}%` : '--';
+                let confColor = 'var(--text-secondary)';
+                if (data.active.conf >= 65) confColor = 'var(--trade-up)';
+                else if (data.active.conf >= 40) confColor = '#facc15';
+                else if (data.active.conf > 0) confColor = 'var(--trade-down)';
+
+                const statusLabel = getStatusLabel(data.active, cPrice);
+                const pips = getPipsInfo(data.active, cPrice);
+
+                tr.innerHTML = `
+                    <td style="font-family:var(--font-mono); color:var(--quantix-accent); font-size:0.8rem;">${data.active.id}</td>
+                    <td style="font-family:var(--font-mono); font-size:0.75rem;">${data.active.generatedAt}</td>
+                    <td><span class="pill ${data.active.side === 'BUY' ? 'up' : 'down'}">${data.active.side}</span></td>
+                    <td style="font-family:var(--font-mono); font-weight:700; color:${confColor}">${confDisplay}</td>
+                    <td style="font-family:var(--font-mono);">${Number(data.active.entry).toFixed(5)}</td>
+                    <td style="font-family:var(--font-mono); color:var(--trade-up)">${Number(data.active.tp).toFixed(5)}</td>
+                    <td style="font-family:var(--font-mono); color:var(--trade-down)">${Number(data.active.sl).toFixed(5)}</td>
+                    <td style="font-family:var(--font-mono); font-weight:700; color:${pips.color}">${pips.label}</td>
+                    <td style="font-family:var(--font-mono); font-size:0.7rem;">--:--</td>
+                    <td><span class="pill" style="background:rgba(255,255,255,0.05); color:#94a3b8; min-width:60px; text-align:center;">${statusLabel}</span></td>
+                `;
+                tbody.appendChild(tr);
+            }
+
+            // Pagination Slice
+            const startIndex = (data.currentPage - 1) * data.itemsPerPage;
+            const endIndex = startIndex + data.itemsPerPage;
+            const pageData = data.sigs.slice(startIndex, endIndex);
+
+            pageData.forEach(s => {
+                const tr = document.createElement('tr');
+                let confDisplay = s.conf > 0 ? `${s.conf}%` : '--';
+                let confColor = 'var(--text-secondary)';
+                if (s.conf >= 65) confColor = 'var(--trade-up)';
+                else if (s.conf >= 40) confColor = '#facc15';
+                else if (s.conf > 0) confColor = 'var(--trade-down)';
+
+                const statusLabel = getStatusLabel(s, null); // No live price for history
+                const pips = getPipsInfo(s, null);
+
+                const resClass = (s.result || '').toUpperCase() === 'PROFIT' ? 'up' : ((s.result || '').toUpperCase() === 'LOSS' ? 'down' : 'neut');
+
+                tr.innerHTML = `
+                    <td style="font-family:var(--font-mono); color:var(--text-primary); font-size:0.8rem;">${s.id}</td>
+                    <td style="font-family:var(--font-mono); font-size:0.75rem;">${s.generatedAt}</td>
+                    <td><span class="pill ${s.side === 'BUY' ? 'up' : 'down'}">${s.side}</span></td>
+                    <td style="font-family:var(--font-mono); font-weight:700; color:${confColor}">${confDisplay}</td>
+                    <td style="font-family:var(--font-mono); font-size:0.75rem;">${Number(s.entry).toFixed(5)}</td>
+                    <td style="font-family:var(--font-mono); font-size:0.75rem;">${Number(s.tp).toFixed(5)}</td>
+                    <td style="font-family:var(--font-mono); font-size:0.75rem;">${Number(s.sl).toFixed(5)}</td>
+                    <td style="font-family:var(--font-mono); font-weight:600; color:${pips.color}">${pips.label}</td>
+                    <td style="font-family:var(--font-mono); font-size:0.7rem;">${s.closedAt}</td>
+                    <td><span class="pill ${resClass}" style="min-width:60px; text-align:center;">${statusLabel}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+            lucide.createIcons();
+            updatePaginationControls();
+        }
+
+        function updatePaginationControls() {
+            const totalPages = Math.ceil(data.sigs.length / data.itemsPerPage) || 1;
+            document.getElementById('page-num').textContent = data.currentPage;
+            document.getElementById('total-pages').textContent = totalPages;
+
+            const btnPrev = document.getElementById('btn-prev');
+            const btnNext = document.getElementById('btn-next');
+
+            if (btnPrev && btnNext) {
+                btnPrev.disabled = data.currentPage === 1;
+                btnNext.disabled = data.currentPage >= totalPages;
+                btnPrev.style.opacity = data.currentPage === 1 ? '0.5' : '1';
+                btnNext.style.opacity = data.currentPage >= totalPages ? '0.5' : '1';
+            }
+        }
+
+        function changePage(delta) {
+            const totalPages = Math.ceil(data.sigs.length / data.itemsPerPage) || 1;
+            const newPage = data.currentPage + delta;
+            if (newPage >= 1 && newPage <= totalPages) {
+                data.currentPage = newPage;
+                renderTable();
+            }
+        }
+
+        async function connectTelegram() {
+            const phone = document.getElementById('tg-phone').value;
+            if (!phone) { addLog("Linker: Phone number required.", "danger"); return; }
+
+            addLog(`Linker: Registering ${phone} with Quantix Core...`, "sys");
+
+            try {
+                const res = await fetch(`${API_BASE}/api/register-telegram`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone })
+                });
+
+                const json = await res.json();
+                if (json.success) {
+                    addLog(`Success: Registered ${phone}`, 'success');
+
+                    if (json.inviteLink) {
+                        const registerContainer = document.querySelector('.register-container');
+                        registerContainer.innerHTML = `
+                            <div style="text-align:center; padding: 20px;">
+                                <div data-lucide="check-circle" style="color:var(--trade-up); margin:0 auto 15px; width:48px; height:48px;"></div>
+                                <h3 style="margin-bottom:10px;">Registration Success!</h3>
+                                <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:20px;">Please join our private group to receive signals.</p>
+                                <a href="${json.inviteLink}" target="_blank" class="register-btn" style="text-decoration:none; display:inline-block; background:var(--quantix-purple); color:#fff;">
+                                    JOIN TELEGRAM GROUP
+                                </a>
+                            </div>
+                        `;
+                        lucide.createIcons();
+                    } else {
+                        alert('Registration successful! We will contact you soon.');
+                    }
+                } else {
+                    throw new Error(json.message);
+                }
+            } catch (err) {
+                console.error(err);
+                // Fallback for demo if server isn't running
+                addLog(`Linker: Local simulation active (Server did not respond).`, "sys");
+            }
+        }
+
+        // Init
+        updateConnectionUI('scanning');
+        initPriceFeed();
+
+        // Wrap original sync to include UI updates
+        const originalSync = syncDatabase;
+        syncDatabase = async function () {
+            updateConnectionUI('scanning');
+            await originalSync();
+            updateConnectionUI('active');
+        };
+
+        setInterval(syncDatabase, 10000);
+        syncDatabase();
+
+        addLog("Quantix AI Core Link: ACTIVE", "success");
+
+        // --- SECURITY PROTECTIONS ---
+        (function () {
+            // 1. Disable Right Click
+            document.addEventListener('contextmenu', event => event.preventDefault());
+
+            // 2. Disable Keyboard Shortcuts (F12, Ctrl+Shift+I, Ctrl+U, etc.)
+            document.onkeydown = function (e) {
+                if (e.keyCode == 123) return false; // F12
+                if (e.ctrlKey && e.shiftKey && (e.keyCode == 'I'.charCodeAt(0) || e.keyCode == 'J'.charCodeAt(0) || e.keyCode == 'C'.charCodeAt(0))) return false;
+                if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false; // View Source
+            };
+
+            // 3. Basic Debugger Trap (Deterrent for DevTools)
+            setInterval(function () {
+                const startTime = performance.now();
+                debugger;
+                const endTime = performance.now();
+                if (endTime - startTime > 100) {
+                    // If debugger paused execution, potential devtools open
+                    console.clear();
+                    document.body.innerHTML = '<div style="background:#000; color:#f00; height:100vh; display:flex; align-items:center; justify-content:center; font-family:monospace;">SECURITY ACCESS DENIED: DEVTOOLS DETECTED</div>';
+                }
+            }, 1000);
+
+            // 4. Console Protection
+            if (typeof console !== "undefined") {
+                const noop = () => { };
+                // Disable common logs in production unless you need them
+                // console.log = noop; 
+                console.warn = noop;
+                console.error = noop;
+                console.info = noop;
+            }
+        })();
+    </script>
+</body>
+
+</html>
