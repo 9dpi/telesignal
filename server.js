@@ -108,11 +108,6 @@ app.post('/api/register-telegram', (req, res) => {
 // ===== STATIC FILES (AFTER API ROUTES) =====
 app.use(express.static(__dirname));
 
-// Fallback for SPA
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
-
 app.listen(PORT, () => {
     console.log(`\n${'='.repeat(60)}`);
     console.log(`🚀 QUANTIX PRODUCTION SERVER`);
