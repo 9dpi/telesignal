@@ -4,18 +4,23 @@ import bodyParser from 'body-parser';
 import fs from 'fs';
 import path from 'path';
 import { createClient } from '@supabase/supabase-js';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 import 'dotenv/config';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const DATA_FILE = path.join(process.cwd(), 'recipients.json');
+const DATA_FILE = path.join(__dirname, 'recipients.json');
 
 // Supabase Setup
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_KEY;
 
 if (!SUPABASE_URL || !SUPABASE_KEY) {
-    console.warn("⚠️  WARNING: SUPABASE_URL or SUPABASE_KEY is missing from environment variables.");
+    console.warn("⚠️  WARNING: SUPABASE_URL or SUPABASE_KEY is missing.");
 }
 
 const supabase = createClient(SUPABASE_URL || '', SUPABASE_KEY || '');
@@ -60,7 +65,7 @@ app.get('/api/signals', async (req, res) => {
 // API: Register Telegram
 app.post('/api/register-telegram', (req, res) => {
     const { phone } = req.body;
-    if (!phone) return res.status(400).json({ success: false, message: 'Phone is required' });
+    if (!phone) return res.status(400).json({ success: false, message: 'Phone required' });
 
     try {
         let recipients = [];
@@ -77,12 +82,18 @@ app.post('/api/register-telegram', (req, res) => {
     }
 });
 
-// Serve static dashboard
-app.use(express.static(process.cwd()));
+// Serve static files
+app.use(express.static(__dirname));
+
+// Explicit root route for Railway
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
 
 app.listen(PORT, () => {
     console.log(`\n---------------------------------------------------`);
-    console.log(`🚀 QUANTIX PRODUCTION SERVER ACTIVE ON PORT ${PORT}`);
+    console.log(`🚀 SERVER RUNNING ON PORT ${PORT}`);
     console.log(`📡 Database: ${SUPABASE_URL ? 'Connected' : 'Disconnected'}`);
+    console.log(`📂 Serving: ${__dirname}`);
     console.log(`---------------------------------------------------\n`);
 });
