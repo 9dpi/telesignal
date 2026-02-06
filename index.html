@@ -1023,7 +1023,23 @@
 
         async function syncDatabase() {
             try {
-                const res = await fetch(`${API_BASE}/api/signals`);
+                // Add timeout to prevent hanging
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+                const res = await fetch(`${API_BASE}/api/signals`, {
+                    signal: controller.signal,
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                clearTimeout(timeoutId);
+
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                }
+
                 const json = await res.json();
                 if (!json.success) throw new Error(json.message);
 
@@ -1064,7 +1080,15 @@
                 renderTable();
             } catch (err) {
                 console.error("DB Sync Error:", err);
-                const errMsg = err.message || JSON.stringify(err);
+
+                let errMsg = 'Unknown error';
+                if (err.name === 'AbortError') {
+                    errMsg = 'Request timeout (Railway may be sleeping)';
+                } else if (err.message.includes('Failed to fetch')) {
+                    errMsg = 'Network error (CORS or Railway offline)';
+                } else {
+                    errMsg = err.message || JSON.stringify(err);
+                }
 
                 document.getElementById('connection-status').textContent = "DISCONNECTED";
                 document.getElementById('connection-status').style.color = "var(--trade-down)";
