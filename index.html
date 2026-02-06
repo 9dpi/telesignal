@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tele Signal | Powered by Quantix AI</title>
     <link rel="stylesheet" href="command-center.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap"
@@ -40,6 +39,15 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            user-select: none;
+            /* Disable text selection */
+            -webkit-user-select: none;
+            -ms-user-select: none;
+        }
+
+        img {
+            pointer-events: none;
+            /* Disable image dragging/saving */
         }
 
         .header-strip {
@@ -81,6 +89,19 @@
 
         .name-suffix {
             color: var(--quantix-purple);
+        }
+
+        .powered-by {
+            font-size: 0.6rem;
+            color: #475569;
+            font-weight: 500;
+            text-transform: none;
+            letter-spacing: 0.5px;
+            margin-left: 4px;
+            align-self: center;
+            font-family: var(--font-mono);
+            border-left: 1px solid #1e293b;
+            padding-left: 10px;
         }
 
         .nav-links {
@@ -319,47 +340,66 @@
             white-space: nowrap;
         }
 
-        /* Specific Column Tweaks (Optional min-widths) */
-        th:nth-child(6),
-        th:nth-child(7),
-        th:nth-child(8) {
-            width: 10%;
+        /* Column Widths Definition (10 columns total) */
+        th:nth-child(1) {
+            width: 80px;
         }
 
-        /* Prices */
-        th:nth-child(9) {
-            width: 15%;
+        /* ID */
+        th:nth-child(2) {
+            width: 90px;
+        }
+
+        /* Created */
+        th:nth-child(3) {
+            width: 70px;
+        }
+
+        /* Side */
+        th:nth-child(4) {
+            width: 80px;
+        }
+
+        /* AI Score */
+        th:nth-child(5) {
+            width: 100px;
+        }
+
+        /* Entry */
+        th:nth-child(6) {
+            width: 100px;
+        }
+
+        /* TP */
+        th:nth-child(7) {
+            width: 100px;
+        }
+
+        /* SL */
+        th:nth-child(8) {
+            width: 110px;
         }
 
         /* Win/Loss */
-        th:nth-child(10) {
-            width: 10%;
-        }
-
-        /* Closed */
-
-        /* Prices */
-        th:nth-child(8) {
-            width: 8%;
-        }
-
-        /* Result */
         th:nth-child(9) {
-            width: 12%;
-        }
-
-        /* Win/Loss */
-        th:nth-child(10) {
-            width: 8%;
+            width: 90px;
         }
 
         /* Closed */
-        th:nth-child(11) {
-            width: 5%;
-            text-align: center;
+        th:nth-child(10) {
+            width: 120px;
         }
 
         /* Status */
+
+        /* Shift Status Column left and remove ellipsis */
+        th:nth-child(10),
+        td:nth-child(10) {
+            padding-left: 0.5rem;
+            /* Reduced from 1.5rem to shift left */
+            overflow: visible;
+            text-overflow: clip;
+        }
 
         td {
             padding: 1.1rem 1.5rem;
@@ -371,18 +411,48 @@
         }
 
         /* Terminal Logs Minimal */
-        .terminal {
-            padding: 1rem 1.5rem;
+        .terminal-container {
+            padding: 1.5rem;
             font-family: var(--font-mono);
             font-size: 0.75rem;
             line-height: 1.6;
             color: #64748b;
-            overflow-x: auto;
+            overflow-y: auto;
+            flex: 1;
+            background: #000;
         }
 
         .log-line {
-            margin-bottom: 4px;
-            white-space: nowrap;
+            margin-bottom: 6px;
+            white-space: pre-wrap;
+            border-left: 2px solid transparent;
+            padding-left: 10px;
+        }
+
+        .log-line.type-sys {
+            border-left-color: #334155;
+        }
+
+        .log-line.type-success {
+            border-left-color: var(--trade-up);
+            color: #e2e8f0;
+        }
+
+        .log-line.type-danger {
+            border-left-color: var(--trade-down);
+            color: #fecaca;
+        }
+
+        .log-line.type-warning {
+            border-left-color: #eab308;
+        }
+
+        .log-msg {
+            color: #cbd5e1;
+        }
+
+        .log-line.type-success .log-msg {
+            color: #fff;
         }
 
         .tab-content {
@@ -652,16 +722,20 @@
             <div class="brand-name">
                 <span class="name-prefix">TELE</span>
                 <span class="name-suffix">SIGNAL</span>
+                <span class="powered-by">[Powered by Quantix AI Core]</span>
             </div>
         </div>
 
         <div class="nav-links">
-            <a href="#" class="nav-link">Overview</a>
+            <a href="https://9dpi.github.io/quantix-ai-core/index.html" target="_blank" class="nav-link">Overview</a>
             <a href="#" class="nav-link" style="color:#fff">Live System</a>
-            <a href="#" class="nav-link">Quantix Lab</a>
-            <a href="#" class="nav-link">API</a>
-            <a href="#" class="nav-link">Contact</a>
-            <a href="#" class="nav-link">Legal</a>
+            <a href="https://9dpi.github.io/quantix-ai-core/signals/index.html" target="_blank" class="nav-link">Quantix
+                Lab</a>
+            <a href="https://9dpi.github.io/quantix-ai-core/api/index.html" target="_blank" class="nav-link">API</a>
+            <a href="https://9dpi.github.io/quantix-ai-core/contact/index.html" target="_blank"
+                class="nav-link">Contact</a>
+            <a href="https://9dpi.github.io/quantix-ai-core/disclaimer/index.html" target="_blank"
+                class="nav-link">Legal</a>
         </div>
     </header>
 
@@ -802,7 +876,10 @@
 
         <section class="viewport">
             <nav class="sub-tabs">
-                <div class="tab-btn active" onclick="switchTab('terminal', this)">Execution Terminal</div>
+                <div style="display:flex; gap: 4px;">
+                    <div class="tab-btn active" onclick="switchTab('terminal', this)">Execution Terminal</div>
+                    <div class="tab-btn" onclick="switchTab('logs', this)">Execution Logs</div>
+                </div>
                 <div class="tg-connector">
                     <div style="display:flex; align-items:center; gap:8px;">
                         <i data-lucide="send" size="14" style="color:var(--quantix-accent)"></i>
@@ -883,17 +960,18 @@
                 </div>
             </div>
 
+            <div id="tab-logs" class="tab-content">
+                <div class="terminal-container" id="terminal-logs">
+                    <div class="log-line type-sys">[SYSTEM] Initializing Quantix Log Stream...</div>
+                </div>
+            </div>
+
 
 
         </section>
     </main>
 
     <script>
-        // Supabase Initialization
-        const SUPABASE_URL = "https://wttsaprezgvircanthbk.supabase.co";
-        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind0dHNhcHJlemd2aXJjYW50aGJrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2ODM2ODA3MCwiZXhwIjoyMDgzOTQ0MDcwfQ.QGewz8bDfBC6vJce6g4-sHA164bL1y0u71d6HH7PYVk";
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
         let data = {
             price: null,
             prevPrice: 0,
@@ -915,8 +993,19 @@
         }
 
         function addLog(msg, type = 'sys') {
-            console.log(`[LOG] ${new Date().toLocaleTimeString()} - ${type}: ${msg}`);
-            // Logs panel removed, logging to console only for debug
+            const container = document.getElementById('terminal-logs');
+            if (container) {
+                const div = document.createElement('div');
+                div.className = `log-line type-${type}`;
+                div.innerHTML = `<span style="color:#475569">[${new Date().toLocaleTimeString()}]</span> <span class="log-msg">${msg}</span>`;
+                container.appendChild(div);
+                container.scrollTop = container.scrollHeight;
+
+                // Limit logs to last 100 lines
+                if (container.children.length > 100) {
+                    container.removeChild(container.firstChild);
+                }
+            }
         }
 
         function calcConfidence(val) {
@@ -931,26 +1020,18 @@
 
         async function syncDatabase() {
             try {
-                // Fetch latest active/waiting signals
-                const { data: liveSigs, error: liveErr } = await supabaseClient
-                    .from('fx_signals')
-                    .select('*')
-                    .in('status', ['WAITING_FOR_ENTRY', 'ACTIVE', 'WAITING'])
-                    .order('generated_at', { ascending: false })
-                    .limit(1);
+                const res = await fetch('/api/signals');
+                const json = await res.json();
+                if (!json.success) throw new Error(json.message);
 
-                if (liveErr) throw liveErr;
-
-                if (liveSigs && liveSigs.length > 0) {
-                    const s = liveSigs[0];
+                if (json.active) {
+                    const s = json.active;
                     const isNew = !data.active || data.active.id !== s.id;
-
                     data.active = {
                         id: s.id,
                         side: s.direction || s.side,
                         entry: s.entry_price || s.entry,
                         tp: s.take_profit || s.tp,
-                        sl: s.stop_loss || s.sl,
                         sl: s.stop_loss || s.sl,
                         status: s.status,
                         conf: calcConfidence(s.ai_confidence || s.release_confidence || s.confidence || s.conf),
@@ -958,23 +1039,12 @@
                         closedAt: s.closed_at ? new Date(s.closed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--',
                         validUntil: s.valid_until ? new Date(s.valid_until).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--'
                     };
-
                     if (isNew) addLog(`Sync: New live signal detected #${s.id}`, 'success');
                 } else {
                     data.active = null;
                 }
 
-                // Fetch history
-                const { data: history, error: histErr } = await supabaseClient
-                    .from('fx_signals')
-                    .select('*')
-                    .in('status', ['CLOSED', 'CANCELLED', 'EXPIRED'])
-                    .order('generated_at', { ascending: false })
-                    .limit(50);
-
-                if (histErr) throw histErr;
-
-                data.sigs = history.map(s => ({
+                data.sigs = json.history.map(s => ({
                     id: s.id,
                     side: s.direction || s.side,
                     entry: s.entry_price || s.entry,
@@ -1012,6 +1082,12 @@
                 statusEl.textContent = "LIVE DATA";
                 statusEl.style.color = "var(--trade-up)";
                 pulseEl.className = "pulse-active";
+
+                // Added success log for connection
+                if (!window.hasLoggedSuccess) {
+                    addLog("Connecting Tele Signal: Success", "success");
+                    window.hasLoggedSuccess = true;
+                }
 
                 if (activeSignal) {
                     // Show latest active signal
@@ -1176,8 +1252,9 @@
                 if (data.pHistory.length > 50) data.pHistory.shift(); // Keep last 50 ticks
 
                 updateUI();
-                // Trigger visual update for progress bar continuously
+                // Trigger visual update for progress bar and table continuously
                 renderSignalView();
+                renderTable();
             };
 
             socket.onerror = (error) => {
@@ -1210,17 +1287,87 @@
             document.getElementById('win-rate').textContent = data.sigs.length > 0 ? ((wins / data.sigs.length) * 100).toFixed(1) + '%' : '0.0%';
         }
 
+        function getStatusLabel(s, currentPrice = null) {
+            if (!s) return '--';
+            const status = (s.status || '').toUpperCase();
+            const result = (s.result || '').toUpperCase();
+            const side = (s.side || '').toUpperCase();
+
+            // 1. Check for real-time hits if signal is active/waiting
+            if (currentPrice && (status === 'WAITING' || status === 'WAITING_FOR_ENTRY' || status === 'ACTIVE' || status === 'ENTRY_HIT')) {
+                const entry = parseFloat(s.entry);
+                const tp = parseFloat(s.tp);
+                const sl = parseFloat(s.sl);
+
+                if (side === 'BUY') {
+                    if (currentPrice >= tp) return 'TP Hit';
+                    if (currentPrice <= sl) return 'SL Hit';
+                    if (currentPrice >= entry || status === 'ACTIVE' || status === 'ENTRY_HIT') return 'Entry Hit';
+                } else if (side === 'SELL') {
+                    if (currentPrice <= tp) return 'TP Hit';
+                    if (currentPrice >= sl) return 'SL Hit';
+                    if (currentPrice <= entry || status === 'ACTIVE' || status === 'ENTRY_HIT') return 'Entry Hit';
+                }
+            }
+
+            // 2. Map final results
+            if (result === 'PROFIT') return 'TP Hit';
+            if (result === 'LOSS') return 'SL Hit';
+
+            // 3. Map transitions
+            if (status === 'ACTIVE' || status === 'ENTRY_HIT') return 'Entry Hit';
+            if (status === 'WAITING' || status === 'WAITING_FOR_ENTRY') return 'Waiting...';
+
+            return 'Closed';
+        }
+
+        function getPipsInfo(s, currentPrice = null) {
+            const entry = parseFloat(s.entry);
+            const tp = parseFloat(s.tp);
+            const sl = parseFloat(s.sl);
+            const side = (s.side || '').toUpperCase();
+            const result = (s.result || '').toUpperCase();
+            const status = (s.status || '').toUpperCase();
+
+            let dist = 0;
+            let label = '--';
+            let color = 'var(--text-secondary)';
+
+            if (result === 'PROFIT') {
+                dist = Math.abs(entry - tp);
+                label = `+${Math.round(dist * 10000 * 10) / 10} pips`;
+                color = 'var(--trade-up)';
+            } else if (result === 'LOSS') {
+                dist = -Math.abs(entry - sl); // Loss is negative
+                label = `${Math.round(dist * 10000 * 10) / 10} pips`;
+                color = 'var(--trade-down)';
+            } else if (currentPrice && (status === 'ACTIVE' || status === 'ENTRY_HIT')) {
+                // Live pips
+                dist = side === 'BUY' ? (currentPrice - entry) : (entry - currentPrice);
+                const pips = Math.round(dist * 10000 * 10) / 10;
+                label = `${pips > 0 ? '+' : ''}${pips} pips`;
+                color = pips >= 0 ? 'var(--trade-up)' : 'var(--trade-down)';
+            }
+
+            return { label, color };
+        }
+
         function renderTable() {
             const tbody = document.getElementById('signal-history');
             tbody.innerHTML = '';
+            const cPrice = data.price;
+
             if (data.active) {
                 const tr = document.createElement('tr');
                 tr.style.background = 'rgba(56, 189, 248, 0.05)';
                 let confDisplay = data.active.conf > 0 ? `${data.active.conf}%` : '--';
                 let confColor = 'var(--text-secondary)';
                 if (data.active.conf >= 65) confColor = 'var(--trade-up)';
-                else if (data.active.conf >= 40) confColor = '#facc15'; // yellow/orange
+                else if (data.active.conf >= 40) confColor = '#facc15';
                 else if (data.active.conf > 0) confColor = 'var(--trade-down)';
+
+                const statusLabel = getStatusLabel(data.active, cPrice);
+                const pips = getPipsInfo(data.active, cPrice);
 
                 tr.innerHTML = `
                     <td style="font-family:var(--font-mono); color:var(--quantix-accent); font-size:0.8rem;">${data.active.id}</td>
@@ -1230,9 +1377,9 @@
                     <td style="font-family:var(--font-mono);">${Number(data.active.entry).toFixed(5)}</td>
                     <td style="font-family:var(--font-mono); color:var(--trade-up)">${Number(data.active.tp).toFixed(5)}</td>
                     <td style="font-family:var(--font-mono); color:var(--trade-down)">${Number(data.active.sl).toFixed(5)}</td>
-                    <td style="font-family:var(--font-mono); font-weight:700; color:var(--text-secondary)">--</td>
+                    <td style="font-family:var(--font-mono); font-weight:700; color:${pips.color}">${pips.label}</td>
                     <td style="font-family:var(--font-mono); font-size:0.7rem;">--:--</td>
-                    <td><span class="pill" style="background:rgba(255,255,255,0.05); color:#94a3b8;">${data.active.status}</span></td>
+                    <td><span class="pill" style="background:rgba(255,255,255,0.05); color:#94a3b8; min-width:60px; text-align:center;">${statusLabel}</span></td>
                 `;
                 tbody.appendChild(tr);
             }
@@ -1244,40 +1391,16 @@
 
             pageData.forEach(s => {
                 const tr = document.createElement('tr');
-                const resultRaw = (s.result || 'UNKNOWN').toUpperCase();
-                const resClass = resultRaw === 'PROFIT' ? 'up' : (resultRaw === 'LOSS' ? 'down' : 'neut');
                 let confDisplay = s.conf > 0 ? `${s.conf}%` : '--';
                 let confColor = 'var(--text-secondary)';
                 if (s.conf >= 65) confColor = 'var(--trade-up)';
                 else if (s.conf >= 40) confColor = '#facc15';
                 else if (s.conf > 0) confColor = 'var(--trade-down)';
 
-                // Calculate Pips
-                let pipsDisplay = '--';
-                let pipsColor = 'var(--text-secondary)';
+                const statusLabel = getStatusLabel(s, null); // No live price for history
+                const pips = getPipsInfo(s, null);
 
-                if (resultRaw === 'PROFIT' || resultRaw === 'LOSS') {
-                    // Start with basic dist
-                    let dist = 0;
-                    if (resultRaw === 'PROFIT') {
-                        // Profit distance = |Entry - TP|
-                        dist = Math.abs(s.entry - s.tp);
-                    } else {
-                        // Loss distance = |Entry - SL|
-                        dist = Math.abs(s.entry - s.sl);
-                    }
-
-                    // Convert to pips (approx for EURUSD)
-                    let pips = Math.round(dist * 10000 * 10) / 10;
-
-                    if (resultRaw === 'PROFIT') {
-                        pipsDisplay = `+${pips} pips`;
-                        pipsColor = 'var(--trade-up)';
-                    } else {
-                        pipsDisplay = `-${pips} pips`;
-                        pipsColor = 'var(--trade-down)';
-                    }
-                }
+                const resClass = (s.result || '').toUpperCase() === 'PROFIT' ? 'up' : ((s.result || '').toUpperCase() === 'LOSS' ? 'down' : 'neut');
 
                 tr.innerHTML = `
                     <td style="font-family:var(--font-mono); color:var(--text-primary); font-size:0.8rem;">${s.id}</td>
@@ -1287,9 +1410,9 @@
                     <td style="font-family:var(--font-mono); font-size:0.75rem;">${Number(s.entry).toFixed(5)}</td>
                     <td style="font-family:var(--font-mono); font-size:0.75rem;">${Number(s.tp).toFixed(5)}</td>
                     <td style="font-family:var(--font-mono); font-size:0.75rem;">${Number(s.sl).toFixed(5)}</td>
-                    <td style="font-family:var(--font-mono); font-weight:600; color:${pipsColor}">${pipsDisplay}</td>
+                    <td style="font-family:var(--font-mono); font-weight:600; color:${pips.color}">${pips.label}</td>
                     <td style="font-family:var(--font-mono); font-size:0.7rem;">${s.closedAt}</td>
-                    <td><span class="pill ${resClass}" style="min-width:60px; text-align:center;">${resultRaw}</span></td>
+                    <td><span class="pill ${resClass}" style="min-width:60px; text-align:center;">${statusLabel}</span></td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -1365,6 +1488,41 @@
         syncDatabase();
 
         addLog("Quantix AI Core Link: ACTIVE", "success");
+
+        // --- SECURITY PROTECTIONS ---
+        (function () {
+            // 1. Disable Right Click
+            document.addEventListener('contextmenu', event => event.preventDefault());
+
+            // 2. Disable Keyboard Shortcuts (F12, Ctrl+Shift+I, Ctrl+U, etc.)
+            document.onkeydown = function (e) {
+                if (e.keyCode == 123) return false; // F12
+                if (e.ctrlKey && e.shiftKey && (e.keyCode == 'I'.charCodeAt(0) || e.keyCode == 'J'.charCodeAt(0) || e.keyCode == 'C'.charCodeAt(0))) return false;
+                if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false; // View Source
+            };
+
+            // 3. Basic Debugger Trap (Deterrent for DevTools)
+            setInterval(function () {
+                const startTime = performance.now();
+                debugger;
+                const endTime = performance.now();
+                if (endTime - startTime > 100) {
+                    // If debugger paused execution, potential devtools open
+                    console.clear();
+                    document.body.innerHTML = '<div style="background:#000; color:#f00; height:100vh; display:flex; align-items:center; justify-content:center; font-family:monospace;">SECURITY ACCESS DENIED: DEVTOOLS DETECTED</div>';
+                }
+            }, 1000);
+
+            // 4. Console Protection
+            if (typeof console !== "undefined") {
+                const noop = () => { };
+                // Disable common logs in production unless you need them
+                // console.log = noop; 
+                console.warn = noop;
+                console.error = noop;
+                console.info = noop;
+            }
+        })();
     </script>
 </body>
 
