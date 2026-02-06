@@ -1057,7 +1057,7 @@
                     <div style="display:flex; align-items:center; gap:10px;">
                         <div class="pulse-active" style="width:8px; height:8px; animation: pulse-ring 1s infinite;">
                         </div>
-                        <span class="section-title" style="color:white;">Neural Network Feed</span>
+                        <span class="section-title" style="color:white;">Neural Market Feed</span>
                     </div>
                     <i data-lucide="brain" size="14" style="color:var(--quantix-purple)"></i>
                 </div>
@@ -1435,12 +1435,12 @@
             const range = primaryMax - primaryMin;
 
             if (current >= primaryMax - (range * 0.05)) {
-                addNeuralInsight(`RESISTANCE: Testing primary supply ceiling at ${current.toFixed(5)}.`, 'highlight');
+                addNeuralInsight(`RESISTANCE: Price at local supply boundary: ${current.toFixed(5)}.`, 'highlight');
                 lastAnalysisTime = now + 10000;
                 return;
             }
             if (current <= primaryMin + (range * 0.05)) {
-                addNeuralInsight(`SUPPORT: Interacting with critical demand zone at ${current.toFixed(5)}.`, 'accent');
+                addNeuralInsight(`SUPPORT: Interacting with local demand zone at ${current.toFixed(5)}.`, 'accent');
                 lastAnalysisTime = now + 10000;
                 return;
             }
@@ -1457,7 +1457,7 @@
             if (Math.random() < 0.05) {
                 const technicals = [
                     "Analyzing micro-structure: Order Flow absorption detected.",
-                    "Neural weights updated: Signal confidence floating at 88%.",
+                    "Price Action: Historical resistance area identified.",
                     "Volatility scan: Standard deviation within optimal range.",
                     "Pattern recognition: Fractal alignment identified on lower TF."
                 ];
