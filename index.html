@@ -1018,9 +1018,13 @@
             return Math.round(val);
         }
 
+        // CONFIG: Set your Railway URL here if hosting frontend elsewhere (e.g. GitHub Pages)
+        // Example: const API_BASE = 'https://quantix-simulator-production.up.railway.app';
+        const API_BASE = '';
+
         async function syncDatabase() {
             try {
-                const res = await fetch('/api/signals');
+                const res = await fetch(`${API_BASE}/api/signals`);
                 const json = await res.json();
                 if (!json.success) throw new Error(json.message);
 
