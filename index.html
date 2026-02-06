@@ -1478,18 +1478,34 @@
             addLog(`Linker: Registering ${phone} with Quantix Core...`, "sys");
 
             try {
-                const res = await fetch('/api/register-telegram', {
+                const res = await fetch(`${API_BASE}/api/register-telegram`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ phone })
                 });
-                const json = await res.json();
 
+                const json = await res.json();
                 if (json.success) {
-                    addLog(`Linker: ${json.message}`, "success");
-                    document.getElementById('tg-phone').value = ''; // Clear input
+                    addLog(`Success: Registered ${phone}`, 'success');
+
+                    if (json.inviteLink) {
+                        const registerContainer = document.querySelector('.register-container');
+                        registerContainer.innerHTML = `
+                            <div style="text-align:center; padding: 20px;">
+                                <div data-lucide="check-circle" style="color:var(--trade-up); margin:0 auto 15px; width:48px; height:48px;"></div>
+                                <h3 style="margin-bottom:10px;">Registration Success!</h3>
+                                <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:20px;">Please join our private group to receive signals.</p>
+                                <a href="${json.inviteLink}" target="_blank" class="register-btn" style="text-decoration:none; display:inline-block; background:var(--quantix-purple); color:#fff;">
+                                    JOIN TELEGRAM GROUP
+                                </a>
+                            </div>
+                        `;
+                        lucide.createIcons();
+                    } else {
+                        alert('Registration successful! We will contact you soon.');
+                    }
                 } else {
-                    addLog(`Linker Error: ${json.message}`, "danger");
+                    throw new Error(json.message);
                 }
             } catch (err) {
                 console.error(err);

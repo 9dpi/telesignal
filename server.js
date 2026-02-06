@@ -7,6 +7,7 @@ import { createClient } from '@supabase/supabase-js';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import nodemailer from 'nodemailer';
+import TelegramBot from 'node-telegram-bot-api';
 import 'dotenv/config';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -34,6 +35,40 @@ const transporter = nodemailer.createTransport({
         pass: process.env.EMAIL_PASS // App Password if using Gmail
     }
 });
+
+// Telegram Bot Setup
+const TELEGRAM_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const ADMIN_CHAT_ID = process.env.TELEGRAM_ADMIN_CHAT_ID;
+const GROUP_CHAT_ID = process.env.TELEGRAM_GROUP_ID; // Optional: The group you want users to join
+
+const bot = TELEGRAM_TOKEN ? new TelegramBot(TELEGRAM_TOKEN, { polling: false }) : null;
+
+async function sendTelegramNotification(phone) {
+    if (!bot || !ADMIN_CHAT_ID) {
+        console.warn("⚠️ Telegram Bot or Admin Chat ID missing. Skipping notification.");
+        return;
+    }
+
+    // 1. Notify Admin
+    const adminMsg = `🚀 *New Telegram Registration*\n\n📱 *Phone:* \`${phone}\`\n⏰ *Time:* ${new Date().toLocaleString()}\n\n_Please verify and add to group if necessary._`;
+
+    try {
+        await bot.sendMessage(ADMIN_CHAT_ID, adminMsg, { parse_mode: 'Markdown' });
+        console.log(`[Telegram] Admin notified for ${phone}`);
+
+        // 2. Generate Invite Link (Optional - if the bot is admin in the group)
+        if (GROUP_CHAT_ID) {
+            const invite = await bot.createChatInviteLink(GROUP_CHAT_ID, {
+                member_limit: 1,
+                expire_date: Math.floor(Date.now() / 1000) + 3600 // 1 hour expiry
+            });
+            return invite.invite_link;
+        }
+    } catch (err) {
+        console.error("Telegram Notification Error:", err.message);
+    }
+    return null;
+}
 
 async function sendEmailNotification(phone) {
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
@@ -130,14 +165,24 @@ app.post('/api/register-telegram', async (req, res) => {
         if (fs.existsSync(DATA_FILE)) {
             recipients = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
         }
+
+        let inviteLink = null;
         if (!recipients.find(r => r.phone === phone)) {
             recipients.push({ phone, timestamp: new Date().toISOString(), status: 'active' });
             fs.writeFileSync(DATA_FILE, JSON.stringify(recipients, null, 2));
 
-            // Send Email Notification
+            // 1. Send Email Notification
             await sendEmailNotification(phone);
+
+            // 2. Send Telegram Notification to Admin & Get Invite Link
+            inviteLink = await sendTelegramNotification(phone);
         }
-        res.json({ success: true, message: 'Registered' });
+
+        res.json({
+            success: true,
+            message: 'Registered',
+            inviteLink: inviteLink // Return the link to the frontend
+        });
     } catch (e) {
         console.error("Registration Error:", e);
         res.status(500).json({ success: false, message: 'Storage error' });
