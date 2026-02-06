@@ -37,6 +37,11 @@ app.use((req, res, next) => {
 
 // ===== API ROUTES (MUST BE BEFORE STATIC) =====
 
+// Simple test route
+app.get('/test', (req, res) => {
+    res.send('Server is working!');
+});
+
 // Health check
 app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
