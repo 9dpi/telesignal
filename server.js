@@ -25,7 +25,13 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
     console.warn("⚠️  WARNING: Missing Supabase credentials");
 }
 
-const supabase = createClient(SUPABASE_URL || '', SUPABASE_KEY || '');
+const supabase = (SUPABASE_URL && SUPABASE_KEY)
+    ? createClient(SUPABASE_URL, SUPABASE_KEY)
+    : null;
+
+if (!supabase) {
+    console.warn("⚠️  Supabase Not Initialized (Missing URL/KEY). Local API routes will return errors, but Static Server will work.");
+}
 
 // Email Setup (SMTP)
 const transporter = nodemailer.createTransport({
@@ -115,6 +121,10 @@ app.get('/api/health', (req, res) => {
 // API: Fetch Signals
 app.get('/api/signals', async (req, res) => {
     try {
+        if (!supabase) {
+            console.warn('Supabase not connected. Returning empty data.');
+            return res.json({ success: true, active: null, history: [] });
+        }
         console.log('Fetching signals from Supabase...');
 
         const { data: liveSigs, error: liveErr } = await supabase
