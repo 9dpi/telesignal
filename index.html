@@ -1052,7 +1052,8 @@
                     title="Join YouTube Channel"><i data-lucide="youtube" size="16"></i></a>
             </div>
 
-            <div id="neural-console" style="flex: 1; display: flex; flex-direction: column;">
+            <div id="neural-console"
+                style="flex: 1; display: flex; flex-direction: column; overflow: hidden; min-height: 0;">
                 <div class="section-header">
                     <div style="display:flex; align-items:center; gap:10px;">
                         <div class="pulse-active" style="width:8px; height:8px; animation: pulse-ring 1s infinite;">
@@ -1063,12 +1064,12 @@
                 </div>
 
                 <div id="neural-history"
-                    style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 1.5rem;">
+                    style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 1.5rem; scrollbar-width: thin; scrollbar-color: var(--border-subtle) transparent;">
                     <!-- Thinking lines will appear here from top to bottom -->
                 </div>
 
                 <div
-                    style="margin: 0 1.5rem 1.5rem 1.5rem; font-size: 0.6rem; color: #475569; display: flex; justify-content: space-between; opacity: 0.5;">
+                    style="margin: 0 1.5rem 1.5rem 1.5rem; font-size: 0.6rem; color: #475569; display: flex; justify-content: space-between; opacity: 0.5; flex-shrink: 0;">
                     <span>SNC STATUS: OPTIMAL</span>
                     <span>v2.1.2</span>
                 </div>
