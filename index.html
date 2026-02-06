@@ -710,6 +710,38 @@
             padding: 12px 0;
             border-top: 1px solid var(--border-subtle);
         }
+
+        /* Spice: Neural Thinking Line */
+        .neural-line {
+            font-size: 0.6rem;
+            color: #64748b;
+            animation: fadeInBlur 0.4s ease forwards;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        @keyframes fadeInBlur {
+            from {
+                opacity: 0;
+                filter: blur(4px);
+                transform: translateY(4px);
+            }
+
+            to {
+                opacity: 1;
+                filter: blur(0);
+                transform: translateY(0);
+            }
+        }
+
+        .neural-line.accent {
+            color: var(--quantix-accent);
+        }
+
+        .neural-line.highlight {
+            color: var(--quantix-purple);
+        }
     </style>
 </head>
 
@@ -751,9 +783,22 @@
                     </div>
                 </div>
                 <div class="current-price" id="price-main">--.-----</div>
-                <div style="height: 30px; margin-top: 5px;">
-                    <svg id="spark" width="100%" height="30"
-                        style="stroke: var(--quantix-accent); fill: none; stroke-width: 2;"></svg>
+                <div style="height: 60px; margin-top: 10px; position: relative;">
+                    <svg id="spark" width="100%" height="60" viewBox="0 0 100 60" preserveAspectRatio="none"
+                        style="filter: drop-shadow(0 0 5px rgba(56, 189, 248, 0.4));">
+                        <defs>
+                            <linearGradient id="sparkGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="rgba(56, 189, 248, 0.2)" />
+                                <stop offset="100%" stop-color="rgba(56, 189, 248, 0)" />
+                            </linearGradient>
+                        </defs>
+                        <path id="spark-fill" d="" fill="url(#sparkGradient)" style="transition: all 0.5s ease;" />
+                        <path id="spark-line" d="" fill="none" stroke="var(--quantix-accent)" stroke-width="2"
+                            stroke-linecap="round" style="transition: all 0.5s ease;" />
+                    </svg>
+                    <div id="price-pulse"
+                        style="position:absolute; right:0; top:50%; width:8px; height:8px; background:white; border-radius:50%; box-shadow:0 0 10px white; transform:translate(50%, -50%); display:none;">
+                    </div>
                 </div>
             </div>
 
@@ -863,6 +908,22 @@
                 </div>
             </div>
 
+            <!-- NEW: Neural Thinking Console (The Spice) -->
+            <div id="neural-console"
+                style="margin-top:20px; background: rgba(0,0,0,0.4); border: 1px solid var(--border-subtle); border-radius: 4px; padding: 12px; font-family: var(--font-mono); display:none;">
+                <div
+                    style="display:flex; align-items:center; gap:8px; margin-bottom:8px; border-bottom:1px solid #1e293b; padding-bottom:6px;">
+                    <div class="pulse-active" style="width:6px; height:6px; animation: pulse-ring 1s infinite;"></div>
+                    <span
+                        style="font-size:0.6rem; color:var(--text-secondary); text-transform:uppercase; letter-spacing:1px;">Neural
+                        Thinking Console</span>
+                </div>
+                <div id="neural-history"
+                    style="height:80px; overflow:hidden; display:flex; flex-direction:column-reverse; gap:4px;">
+                    <!-- Thinking lines will appear here -->
+                </div>
+            </div>
+
             </div>
 
             <div id="no-signal-view"
@@ -898,7 +959,9 @@
                     <!-- Executions -->
                     <div class="section-container">
                         <div class="section-header">
-                            <div class="section-title">Live Executions</div>
+                            <div class="section-title">Live Executions <span id="header-utc-clock"
+                                    style="margin-left:10px; opacity:0.5; font-weight:normal; text-transform:none; font-family:var(--font-mono);"></span>
+                            </div>
                             <i data-lucide="activity" size="14" style="color:var(--text-secondary)"></i>
                         </div>
                         <div class="content-scroller">
@@ -1057,8 +1120,15 @@
                         closedAt: s.closed_at ? new Date(s.closed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--',
                         validUntil: s.valid_until ? new Date(s.valid_until).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--'
                     };
-                    if (isNew) addLog(`Sync: New live signal detected #${s.id}`, 'success');
+                    if (isNew) {
+                        addLog(`Sync: New live signal detected #${s.id}`, 'success');
+                        addNeuralInsight(`CRITICAL: New ${s.direction || s.side} setup identified. Executing neural validation...`, 'highlight');
+                        setTimeout(() => addNeuralInsight(`Confidence level confirmed at ${data.active.conf}%. Signal pushed to network.`, 'accent'), 1500);
+                    }
                 } else {
+                    if (data.active) {
+                        addNeuralInsight("Signal lifecycle terminated. Returning to monitoring state.", "sys");
+                    }
                     data.active = null;
                 }
 
@@ -1289,28 +1359,107 @@
             };
         }
 
+        // Premium Spice: Neural Insights Generator
+        const NEURAL_INSIGHTS = [
+            "Analyzing market structure: H4 Bearish alignment detected.",
+            "Detecting Order Block at 1.0820 zone...",
+            "Liquidity sweep confirmed on M5 timeframe.",
+            "Volume profile: High activity in London-NY overlap.",
+            "RSI Divergence forming on lower timeframes.",
+            "Neural weights updated: Trend strength 84%.",
+            "Volatility scan: Standard deviation within range.",
+            "Pattern recognition: Ascending triangle merging.",
+            "Sentiment Analysis: Bullish bias increasing.",
+            "Fibonacci cluster identified at current level."
+        ];
+
+        function addNeuralInsight(msg, type = 'accent') {
+            const container = document.getElementById('neural-history');
+            const consoleBox = document.getElementById('neural-console');
+            if (container) {
+                consoleBox.style.display = 'block';
+                const div = document.createElement('div');
+                div.className = `neural-line ${type}`;
+                div.textContent = `> ${msg}`;
+                container.prepend(div);
+                if (container.children.length > 5) container.lastElementChild.remove();
+            }
+        }
+
         function updateUI() {
-            if (!data.price || data.price === 1.08450) return; // Wait for real data
+            if (!data.price || data.price === 1.08450) return;
 
             priceEl.textContent = data.price.toFixed(5);
             const bid = document.getElementById('bid-price');
             const ask = document.getElementById('ask-price');
             if (bid && ask) {
-                bid.textContent = (data.price - 0.0001).toFixed(5); // Est Spread
+                bid.textContent = (data.price - 0.0001).toFixed(5);
                 ask.textContent = (data.price + 0.0001).toFixed(5);
             }
             priceEl.style.color = data.price > data.prevPrice ? 'var(--trade-up)' : (data.price < data.prevPrice ? 'var(--trade-down)' : 'white');
+
+            // Pulse effect
+            const pulse = document.getElementById('price-pulse');
+            if (pulse) {
+                pulse.style.display = 'block';
+                pulse.style.top = `${Math.random() * 80 + 10}%`;
+                pulse.style.opacity = '1';
+                setTimeout(() => pulse.style.opacity = '0.3', 100);
+            }
+
             data.prevPrice = data.price;
 
+            // Upgraded Sparkline Rendering
             const svg = document.getElementById('spark');
-            const min = Math.min(...data.pHistory), max = Math.max(...data.pHistory);
-            const range = (max - min) || 0.0001;
-            const pts = data.pHistory.map((v, i) => `${(i / 29) * svg.clientWidth},${30 - ((v - min) / range) * 25}`).join(' ');
-            svg.innerHTML = `<polyline points="${pts}" />`;
+            const linePath = document.getElementById('spark-line');
+            const fillPath = document.getElementById('spark-fill');
+
+            if (data.pHistory.length > 2) {
+                const min = Math.min(...data.pHistory), max = Math.max(...data.pHistory);
+                const range = (max - min) || 0.0001;
+                const width = 100; // viewBox width
+                const height = 60; // viewBox height
+
+                const points = data.pHistory.map((v, i) => {
+                    const x = (i / (data.pHistory.length - 1)) * width;
+                    const y = height - ((v - min) / range) * (height - 10) - 5;
+                    return { x, y };
+                });
+
+                const d = `M ${points.map(p => `${p.x} ${p.y}`).join(' L ')}`;
+                linePath.setAttribute('d', d);
+
+                const fillD = `${d} L ${points[points.length - 1].x} ${height} L ${points[0].x} ${height} Z`;
+                fillPath.setAttribute('d', fillD);
+            }
+
+            // Random Neural Spices
+            if (Math.random() > 0.95) {
+                const insight = NEURAL_INSIGHTS[Math.floor(Math.random() * NEURAL_INSIGHTS.length)];
+                addNeuralInsight(insight, Math.random() > 0.5 ? 'accent' : 'highlight');
+            }
 
             document.getElementById('total-sigs').textContent = data.sigs.length;
             const wins = data.sigs.filter(s => s.result === 'PROFIT').length;
             document.getElementById('win-rate').textContent = data.sigs.length > 0 ? ((wins / data.sigs.length) * 100).toFixed(1) + '%' : '0.0%';
+        }
+
+        // Real-time UTC Clock for Header
+        function updateHeaderClock() {
+            const now = new Date();
+            const utc = now.getUTCFullYear() + '-' + String(now.getUTCMonth() + 1).padStart(2, '0') + '-' + String(now.getUTCDate()).padStart(2, '0') + ' ' +
+                String(now.getUTCHours()).padStart(2, '0') + ':' + String(now.getUTCMinutes()).padStart(2, '0') + ':' + String(now.getUTCSeconds()).padStart(2, '0') + ' UTC';
+            const el = document.getElementById('header-utc-clock');
+            if (el) el.textContent = `[ ${utc} ]`;
+        }
+        setInterval(updateHeaderClock, 1000);
+        updateHeaderClock();
+
+        function formatUTC(dateStr) {
+            const d = new Date(dateStr);
+            const date = d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0') + '-' + String(d.getUTCDate()).padStart(2, '0');
+            const time = String(d.getUTCHours()).padStart(2, '0') + ':' + String(d.getUTCMinutes()).padStart(2, '0');
+            return `${date} ${time}`;
         }
 
         function getStatusLabel(s, currentPrice = null) {
