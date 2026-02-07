@@ -1414,12 +1414,11 @@
                 renderSignalView();
                 renderTable();
 
-                // Bonus: Connection indicator
                 const statusEl = document.getElementById('connection-status');
                 if (statusEl) {
                     if (isMarketClosed()) {
-                        statusEl.textContent = "MARKET CLOSED (Price Live)";
-                        statusEl.style.color = "#facc15";
+                        statusEl.textContent = "MARKET CLOSED";
+                        statusEl.style.color = "var(--text-secondary)";
                     } else {
                         statusEl.textContent = "SYSTEM ACTIVE";
                         statusEl.style.color = "var(--trade-up)";
