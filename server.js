@@ -127,10 +127,13 @@ app.get('/api/signals', async (req, res) => {
         }
         console.log('Fetching signals from Supabase...');
 
+        const START_DATE = '2026-02-07T00:00:00Z';
+
         const { data: liveSigs, error: liveErr } = await supabase
             .from('fx_signals')
             .select('*')
             .in('status', ['WAITING_FOR_ENTRY', 'ACTIVE', 'WAITING'])
+            .gte('generated_at', START_DATE)
             .order('generated_at', { ascending: false })
             .limit(1);
 
@@ -143,6 +146,7 @@ app.get('/api/signals', async (req, res) => {
             .from('fx_signals')
             .select('*')
             .in('status', ['CLOSED', 'CANCELLED', 'EXPIRED'])
+            .gte('generated_at', START_DATE)
             .order('generated_at', { ascending: false })
             .limit(50);
 
