@@ -160,47 +160,58 @@
             .app-shell {
                 display: flex;
                 flex-direction: column;
-                height: auto;
+                height: 100vh;
+                /* Force full viewport height */
                 grid-template-columns: 1fr;
+                justify-content: flex-start;
+                /* Stack from top */
             }
 
             .sidebar {
                 width: 100%;
                 height: auto;
                 padding: 0;
-                /* Full screen feel */
-                border-bottom: 1px solid var(--border-subtle);
+                border-bottom: none;
+                /* Seamless look */
+                flex: 1;
+                /* Take all available space */
+                display: flex;
+                flex-direction: column;
+            }
+
+            /* HIDE EVERYTHING ELSE ON MOBILE */
+            .viewport,
+            .right-panel,
+            .sub-tabs,
+            #tab-terminal,
+            #tab-logs {
+                display: none !important;
             }
 
             .price-card {
-                border-left: none;
-                border-right: none;
-                border-radius: 0;
-                padding: 2rem 1rem;
+                padding: 1.5rem 1rem;
+                border-bottom: 1px solid var(--border-subtle);
+                flex-shrink: 0;
             }
 
             #signal-view,
             #no-signal-view {
-                border-left: none !important;
-                border-right: none !important;
+                flex: 1;
+                /* Stretch to fill remaining space */
                 border-radius: 0 !important;
                 margin: 0 !important;
                 width: 100% !important;
+                border: none !important;
+                background: transparent !important;
+                padding: 1.5rem !important;
+                justify-content: flex-start;
+                /* Align content to top */
             }
 
-            .viewport {
-                width: 100%;
-                height: auto;
-                flex: none;
-            }
-
-            .right-panel {
-                display: none !important;
-                /* Requirement: Hide Neural Market Feed on Mobile */
-            }
-
-            .workspace-grid {
-                height: auto;
+            /* Adjust typography for mobile readability */
+            .current-price {
+                font-size: 3.5rem;
+                /* Bigger price */
             }
 
             .section-header {
