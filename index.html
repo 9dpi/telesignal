@@ -167,8 +167,25 @@
             .sidebar {
                 width: 100%;
                 height: auto;
-                padding: 1rem;
+                padding: 0;
+                /* Full screen feel */
                 border-bottom: 1px solid var(--border-subtle);
+            }
+
+            .price-card {
+                border-left: none;
+                border-right: none;
+                border-radius: 0;
+                padding: 2rem 1rem;
+            }
+
+            #signal-view,
+            #no-signal-view {
+                border-left: none !important;
+                border-right: none !important;
+                border-radius: 0 !important;
+                margin: 0 !important;
+                width: 100% !important;
             }
 
             .viewport {
@@ -1264,6 +1281,9 @@
 
         const terminal = document.getElementById('terminal');
         const priceEl = document.getElementById('price-main');
+
+        // Initialize itemsPerPage based on screen size
+        data.itemsPerPage = window.innerWidth < 1024 ? 5 : 10;
 
         function switchTab(id, btn) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
