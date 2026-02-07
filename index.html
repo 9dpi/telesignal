@@ -209,6 +209,12 @@
             }
 
             /* Responsive Table -> Card Layout */
+            table {
+                min-width: auto !important;
+                width: 100% !important;
+                margin: 0 !important;
+            }
+
             table,
             thead,
             tbody,
@@ -226,10 +232,11 @@
 
             tr {
                 border: 1px solid var(--border-subtle);
-                margin: 0 1rem 1.5rem 1rem;
+                margin: 0 1rem 1.5rem 1rem !important;
                 border-radius: 8px;
                 padding: 1rem;
                 background: rgba(15, 23, 42, 0.3);
+                width: calc(100% - 2rem) !important;
             }
 
             td {
@@ -246,6 +253,7 @@
                 overflow: visible;
                 white-space: normal;
                 padding-left: 45% !important;
+                font-size: 0.75rem !important;
             }
 
             td:last-child {
@@ -255,7 +263,7 @@
             td:before {
                 content: attr(data-label);
                 position: absolute;
-                left: 0;
+                left: 1rem;
                 width: 40%;
                 padding-right: 10px;
                 white-space: nowrap;
@@ -265,6 +273,10 @@
                 color: var(--text-secondary);
                 text-transform: uppercase;
                 letter-spacing: 0.5px;
+            }
+
+            .content-scroller {
+                overflow-x: hidden !important;
             }
         }
 
