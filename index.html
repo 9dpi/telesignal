@@ -1470,19 +1470,6 @@
             const sigView = document.getElementById('signal-view');
             const noSigView = document.getElementById('no-signal-view');
 
-            if (isMarketClosed()) {
-                sigView.style.display = 'none';
-                noSigView.style.display = 'flex';
-                noSigView.innerHTML = `
-                    <i data-lucide="clock" size="40" style="opacity: 0.3; margin-bottom: 1rem; color:var(--text-secondary)"></i>
-                    <div style="font-size: 1.2rem; font-weight: 800; color: white; margin-bottom: 8px;">Market Closed</div>
-                    <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 4px;">Forex market is currently closed.</div>
-                    <div style="font-size: 0.8rem; color: var(--quantix-accent); font-weight: 500;">Signals will resume soon.</div>
-                `;
-                lucide.createIcons();
-                return;
-            }
-
             // Determine which signal to show: Active > Last History > None
             let displaySig = data.active;
             let isHistorical = false;
@@ -1495,6 +1482,11 @@
             if (!displaySig) {
                 sigView.style.display = 'none';
                 noSigView.style.display = 'flex';
+                noSigView.innerHTML = `
+                    <i data-lucide="radar" size="48" style="opacity: 0.2; margin-bottom: 1rem;"></i>
+                    <div id="scanning-text" style="font-size: 0.8rem; font-weight: 500;">Initializing Quantix Network...</div>
+                `;
+                lucide.createIcons();
                 return;
             }
 
