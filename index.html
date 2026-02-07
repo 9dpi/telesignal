@@ -104,10 +104,168 @@
             padding-left: 10px;
         }
 
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+        }
+
         .nav-links {
             display: flex;
             gap: 2rem;
             align-items: center;
+        }
+
+        /* --- Mobile Specific Styles --- */
+        @media screen and (max-width: 1024px) {
+            body {
+                height: auto;
+                overflow-x: hidden;
+                overflow-y: auto;
+            }
+
+            .header-strip {
+                height: 60px;
+                padding: 0 1rem;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .nav-links {
+                display: none;
+                position: fixed;
+                top: 60px;
+                left: 0;
+                width: 100%;
+                background: #000;
+                flex-direction: column;
+                padding: 2rem;
+                border-bottom: 1px solid var(--border-subtle);
+                z-index: 1000;
+                gap: 2rem;
+            }
+
+            .nav-links.active {
+                display: flex;
+            }
+
+            .powered-by {
+                display: none;
+            }
+
+            .app-shell {
+                display: flex;
+                flex-direction: column;
+                height: auto;
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                padding: 1rem;
+                border-bottom: 1px solid var(--border-subtle);
+            }
+
+            .viewport {
+                width: 100%;
+                height: auto;
+                flex: none;
+            }
+
+            .right-panel {
+                display: none !important;
+                /* Requirement: Hide Neural Market Feed on Mobile */
+            }
+
+            .workspace-grid {
+                height: auto;
+            }
+
+            .section-header {
+                padding: 1rem;
+            }
+
+            .sub-tabs {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+                align-items: flex-start;
+            }
+
+            .tg-connector {
+                width: 100%;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .tg-input-group {
+                width: 100%;
+                max-width: none;
+            }
+
+            /* Responsive Table -> Card Layout */
+            table,
+            thead,
+            tbody,
+            th,
+            td,
+            tr {
+                display: block;
+            }
+
+            thead tr {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+
+            tr {
+                border: 1px solid var(--border-subtle);
+                margin: 0 1rem 1.5rem 1rem;
+                border-radius: 8px;
+                padding: 1rem;
+                background: rgba(15, 23, 42, 0.3);
+            }
+
+            td {
+                border: none;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+                position: relative;
+                padding: 0.75rem 0 0.75rem 45% !important;
+                text-align: right;
+                min-height: 45px;
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+                width: 100% !important;
+                overflow: visible;
+                white-space: normal;
+                padding-left: 45% !important;
+            }
+
+            td:last-child {
+                border-bottom: none;
+            }
+
+            td:before {
+                content: attr(data-label);
+                position: absolute;
+                left: 0;
+                width: 40%;
+                padding-right: 10px;
+                white-space: nowrap;
+                text-align: left;
+                font-weight: 700;
+                font-size: 0.65rem;
+                color: var(--text-secondary);
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
         }
 
         .nav-link {
@@ -770,7 +928,11 @@
             </div>
         </div>
 
-        <div class="nav-links">
+        <button class="mobile-menu-btn" id="mobile-menu-toggle">
+            <i data-lucide="menu"></i>
+        </button>
+
+        <div class="nav-links" id="mobile-nav">
             <a href="https://9dpi.github.io/quantix-ai-core/index.html" target="_blank" class="nav-link">Overview</a>
             <a href="#" class="nav-link" style="color:#fff">Live System</a>
 
@@ -1613,16 +1775,18 @@
                 const pips = getPipsInfo(data.active, cPrice);
 
                 tr.innerHTML = `
-                    <td style="font-family:var(--font-mono); color:var(--quantix-accent); font-size:0.8rem;">${data.active.id}</td>
-                    <td style="font-family:var(--font-mono); font-size:0.75rem;">${data.active.generatedAt}</td>
-                    <td><span class="pill ${data.active.side === 'BUY' ? 'up' : 'down'}">${data.active.side}</span></td>
-                    <td style="font-family:var(--font-mono); font-weight:700; color:${confColor}">${confDisplay}</td>
-                    <td style="font-family:var(--font-mono);">${Number(data.active.entry).toFixed(5)}</td>
-                    <td style="font-family:var(--font-mono); color:var(--trade-up)">${Number(data.active.tp).toFixed(5)}</td>
-                    <td style="font-family:var(--font-mono); color:var(--trade-down)">${Number(data.active.sl).toFixed(5)}</td>
-                    <td style="font-family:var(--font-mono); font-weight:700; color:${pips.color}">${pips.label}</td>
-                    <td style="font-family:var(--font-mono); font-size:0.7rem;">--:--</td>
-                    <td><span class="pill" style="background:rgba(255,255,255,0.05); color:#94a3b8; min-width:60px; text-align:center;">${statusLabel}</span></td>
+                    <td data-label="ID" style="font-family:var(--font-mono); color:var(--quantix-accent); font-size:0.8rem;">${data.active.id}</td>
+                    <td data-label="Created" style="font-family:var(--font-mono); font-size:0.75rem;">${data.active.generatedAt}</td>
+                    <td data-label="Side"><span class="pill ${data.active.side === 'BUY' ? 'up' : 'down'}">${data.active.side}</span></td>
+                    <td data-label="AI Score" style="font-family:var(--font-mono); font-weight:700; color:${confColor}">${confDisplay}</td>
+                    <td data-label="Entry" style="font-family:var(--font-mono);">${Number(data.active.entry).toFixed(5)}</td>
+                    <td data-label="TP" style="font-family:var(--font-mono); color:var(--trade-up)">${Number(data.active.tp).toFixed(5)}</td>
+                    <td data-label="SL" style="font-family:var(--font-mono); color:var(--trade-down)">${Number(data.active.sl).toFixed(5)}</td>
+                    <td data-label="Win/Loss" style="font-family:var(--font-mono); font-weight:700; color:${pips.color}">${pips.label}</td>
+                    <td data-label="Closed" style="font-family:var(--font-mono); font-size:0.7rem;">--:--</td>
+                    <td data-label="Status">
+                        <span class="pill" style="background:rgba(255,255,255,0.05); color:#94a3b8; min-width:60px; text-align:center;">${statusLabel}</span>
+                    </td>
                 `;
                 tbody.appendChild(tr);
             }
@@ -1642,20 +1806,23 @@
 
                 const statusLabel = getStatusLabel(s, null); // No live price for history
                 const pips = getPipsInfo(s, null);
+                const closedAt = s.closedAt; // Assuming closedAt is defined or comes from s
 
                 const resClass = (s.result || '').toUpperCase() === 'PROFIT' ? 'up' : ((s.result || '').toUpperCase() === 'LOSS' ? 'down' : 'neut');
 
                 tr.innerHTML = `
-                    <td style="font-family:var(--font-mono); color:var(--text-primary); font-size:0.8rem;">${s.id}</td>
-                    <td style="font-family:var(--font-mono); font-size:0.75rem;">${s.generatedAt}</td>
-                    <td><span class="pill ${s.side === 'BUY' ? 'up' : 'down'}">${s.side}</span></td>
-                    <td style="font-family:var(--font-mono); font-weight:700; color:${confColor}">${confDisplay}</td>
-                    <td style="font-family:var(--font-mono); font-size:0.75rem;">${Number(s.entry).toFixed(5)}</td>
-                    <td style="font-family:var(--font-mono); font-size:0.75rem;">${Number(s.tp).toFixed(5)}</td>
-                    <td style="font-family:var(--font-mono); font-size:0.75rem;">${Number(s.sl).toFixed(5)}</td>
-                    <td style="font-family:var(--font-mono); font-weight:600; color:${pips.color}">${pips.label}</td>
-                    <td style="font-family:var(--font-mono); font-size:0.7rem;">${s.closedAt}</td>
-                    <td><span class="pill ${resClass}" style="min-width:60px; text-align:center;">${statusLabel}</span></td>
+                    <td data-label="ID" style="font-family:var(--font-mono); color:var(--text-primary); font-size:0.8rem;">${s.id}</td>
+                    <td data-label="Created" style="font-family:var(--font-mono); font-size:0.75rem;">${s.generatedAt}</td>
+                    <td data-label="Side"><span class="pill ${s.side === 'BUY' ? 'up' : 'down'}">${s.side}</span></td>
+                    <td data-label="AI Score" style="font-family:var(--font-mono); font-weight:700; color:${confColor}">${confDisplay}</td>
+                    <td data-label="Entry" style="font-family:var(--font-mono);">${Number(s.entry).toFixed(5)}</td>
+                    <td data-label="TP" style="font-family:var(--font-mono); color:var(--trade-up)">${Number(s.tp).toFixed(5)}</td>
+                    <td data-label="SL" style="font-family:var(--font-mono); color:var(--trade-down)">${Number(s.sl).toFixed(5)}</td>
+                    <td data-label="Win/Loss" style="font-family:var(--font-mono); font-weight:700; color:${pips.color}">${pips.label}</td>
+                    <td data-label="Closed" style="font-family:var(--font-mono); font-size:0.7rem;">${closedAt}</td>
+                    <td data-label="Status">
+                        <span class="pill ${resClass}" style="min-width:60px; text-align:center;">${statusLabel}</span>
+                    </td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -1729,6 +1896,18 @@
                 addLog(`Linker: Critical error in registration.`, "danger");
             }
         }
+
+        // Mobile Menu Toggle
+        document.getElementById('mobile-menu-toggle').addEventListener('click', () => {
+            document.getElementById('mobile-nav').classList.toggle('active');
+        });
+
+        // Close menu when clicking links
+        document.querySelectorAll('#mobile-nav .nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                document.getElementById('mobile-nav').classList.remove('active');
+            });
+        });
 
         // Init
         updateConnectionUI('scanning');
