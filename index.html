@@ -1221,10 +1221,21 @@
             const pulseEl = document.getElementById('connection-pulse');
             const scanText = document.getElementById('scanning-text');
 
+            if (status === 'scanning') {
+                statusEl.textContent = "SYNCHRONIZING";
+                statusEl.style.color = "#eab308";
+                pulseEl.className = "pulse-scanning";
+
+                if (isMarketClosed()) return; // Don't overwrite Market Closed message
+                if (scanText && !data.active) scanText.textContent = "Scanning for new signals...";
+            }
+
             if (status === 'active') {
                 statusEl.textContent = "LIVE DATA";
                 statusEl.style.color = "var(--trade-up)";
                 pulseEl.className = "pulse-active";
+
+                if (isMarketClosed()) return; // Don't overwrite Market Closed message
 
                 // Added success log for connection
                 if (!window.hasLoggedSuccess) {
@@ -1258,12 +1269,6 @@
                 } else {
                     scanText.textContent = "Monitoring Quantix Network Channel...";
                 }
-
-            } else if (status === 'scanning') {
-                statusEl.textContent = "SYNCHRONIZING";
-                statusEl.style.color = "#eab308";
-                pulseEl.className = "pulse-scanning";
-                if (scanText && !data.active) scanText.textContent = "Scanning for new signals...";
             }
         }
 

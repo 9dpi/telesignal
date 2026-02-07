@@ -134,7 +134,6 @@ app.get('/api/signals', async (req, res) => {
             .select('*')
             .in('status', ['WAITING_FOR_ENTRY', 'ACTIVE', 'WAITING'])
             .gte('generated_at', START_DATE)
-            .not('telegram_id', 'is', null) // Only real signals have Telegram IDs
             .order('generated_at', { ascending: false })
             .limit(1);
 
@@ -148,7 +147,6 @@ app.get('/api/signals', async (req, res) => {
             .select('*')
             .in('status', ['CLOSED', 'CANCELLED', 'EXPIRED'])
             .gte('generated_at', START_DATE)
-            .not('telegram_id', 'is', null) // Only real signals have Telegram IDs
             .order('generated_at', { ascending: false })
             .limit(50);
 
