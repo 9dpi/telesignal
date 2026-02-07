@@ -158,7 +158,13 @@ app.get('/api/signals', async (req, res) => {
         const response = {
             success: true,
             active: liveSigs && liveSigs.length > 0 ? liveSigs[0] : null,
-            history: history || []
+            history: (history || []).filter(s => {
+                if (!s.generated_at || !s.closed_at) return true; // Keep if not fully closed yet
+                const start = new Date(s.generated_at);
+                const end = new Date(s.closed_at);
+                const durationMinutes = (end - start) / (1000 * 60);
+                return durationMinutes <= 120; // Only show signals that closed within 2 hours
+            })
         };
 
         console.log(`Returning ${history?.length || 0} historical signals`);
