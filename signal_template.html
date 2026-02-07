@@ -1512,6 +1512,14 @@
             document.getElementById(`tab-${id}`).classList.add('active');
         }
 
+        function isMarketClosed() {
+            const now = new Date();
+            const day = now.getUTCDay();
+            const hour = now.getUTCHours();
+            // Market closes Fri 22:00 UTC, opens Sun 22:00 UTC
+            return (day === 6) || (day === 0 && hour < 22) || (day === 5 && hour >= 22);
+        }
+
         function addLog(msg, type = 'sys') {
             const container = document.getElementById('terminal-logs');
             if (container) {
@@ -1677,6 +1685,19 @@
             const sigView = document.getElementById('signal-view');
             const noSigView = document.getElementById('no-signal-view');
 
+            if (isMarketClosed()) {
+                sigView.style.display = 'none';
+                noSigView.style.display = 'flex';
+                noSigView.innerHTML = `
+                    <i data-lucide="clock" size="40" style="opacity: 0.3; margin-bottom: 1rem; color:var(--text-secondary)"></i>
+                    <div style="font-size: 1.2rem; font-weight: 800; color: white; margin-bottom: 8px;">Market Closed</div>
+                    <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 4px;">Forex market is currently closed.</div>
+                    <div style="font-size: 0.8rem; color: var(--quantix-accent); font-weight: 500;">Signals will resume soon.</div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
             // Determine which signal to show: Active > Last History > None
             let displaySig = data.active;
             let isHistorical = false;
@@ -1791,21 +1812,13 @@
             const socket = new WebSocket('wss://stream.binance.com:9443/ws/eurusdt@trade');
 
             socket.onmessage = (event) => {
-                // Market Hours Check (Simple JS version)
-                const now = new Date();
-                const day = now.getUTCDay(); // 0=Sun, 6=Sat
-                const hour = now.getUTCHours();
-
-                // Market closes Fri 22:00 UTC, opens Sun 22:00 UTC
-                const isWeekend = (day === 6) || (day === 0 && hour < 22) || (day === 5 && hour >= 22);
-
-                if (isWeekend) {
+                if (isMarketClosed()) {
                     const statusEl = document.getElementById('connection-status');
                     if (statusEl) {
                         statusEl.textContent = "MARKET CLOSED";
                         statusEl.style.color = "var(--text-secondary)";
                     }
-                    return; // Stop updating price
+                    return;
                 }
 
                 const trade = JSON.parse(event.data);
