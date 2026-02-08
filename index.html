@@ -614,6 +614,86 @@
             filter: brightness(1.2);
         }
 
+        /* --- Agent Anchor Tooltips --- */
+        [data-agent-tip] {
+            position: relative;
+            cursor: help;
+        }
+
+        [data-agent-tip]::after {
+            content: attr(data-agent-tip);
+            position: absolute;
+            bottom: 120%;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 4px 8px;
+            background: #1e2329;
+            border: 1px solid var(--border-subtle);
+            color: white;
+            font-size: 0.6rem;
+            border-radius: 4px;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s ease;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            pointer-events: none;
+        }
+
+        [data-agent-tip].tip-obs::after {
+            border-color: var(--quantix-accent);
+            color: var(--quantix-accent);
+        }
+
+        [data-agent-tip].tip-reason::after {
+            border-color: var(--quantix-purple);
+            color: var(--quantix-purple);
+        }
+
+        [data-agent-tip].tip-adv::after {
+            border-color: #f59e0b;
+            color: #f59e0b;
+        }
+
+        [data-agent-tip]:hover::after {
+            opacity: 1;
+            visibility: visible;
+            bottom: 140%;
+        }
+
+        /* --- Agent Anchor Labels --- */
+        .agent-anchor-label {
+            display: inline-flex;
+            align-items: center;
+            padding: 1px 6px;
+            border-radius: 3px;
+            font-size: 0.55rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+            border: 1px solid transparent;
+        }
+
+        .agent-anchor-label.obs {
+            background: rgba(56, 189, 248, 0.1);
+            border-color: rgba(56, 189, 248, 0.3);
+            color: var(--quantix-accent);
+        }
+
+        .agent-anchor-label.reason {
+            background: rgba(139, 92, 246, 0.1);
+            border-color: rgba(139, 92, 246, 0.3);
+            color: var(--quantix-purple);
+        }
+
+        .agent-anchor-label.adv {
+            background: rgba(245, 158, 11, 0.1);
+            border-color: rgba(245, 158, 11, 0.3);
+            color: #f59e0b;
+        }
+
         /* --- AI Agent System Styles --- */
         .agent-observation-bar {
             background: rgba(0, 0, 0, 0.4);
@@ -1358,12 +1438,15 @@
     </header>
 
     <main class="app-shell">
-        <aside class="sidebar" id="sidebar-content">
+        <aside class="sidebar" id="sidebar-content" style="overflow-x: hidden;">
             <!-- Sidebar Header / Price Card -->
             <div class="price-card">
                 <div
-                    style="display:flex; justify-content:space-between; font-size:0.7rem; color:var(--text-secondary); font-weight:700; align-items:center;">
-                    <span>EUR / USD</span>
+                    style="display:flex; justify-content:space-between; font-size:0.7rem; color:var(--text-secondary); font-weight:700; align-items:center; margin-bottom:4px;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span data-agent-tip="L1 OBSERVATION: Monitoring Real-time Price" class="tip-obs">EUR /
+                            USD</span>
+                    </div>
                     <div style="display:flex; align-items:center; gap:6px;">
                         <div id="connection-pulse" class="pulse-scanning"></div>
                         <span id="connection-status" style="color:var(--text-primary)">INITIALIZING</span>
@@ -1427,7 +1510,10 @@
                     </div>
                     <div class="signal-row">
                         <span class="sig-label">Entry Price:</span>
-                        <span id="view-entry" class="sig-value mono"></span>
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <span id="view-entry" class="sig-value mono"
+                                data-agent-tip="L2 REASONING: Calculated Entry Reference" class="tip-reason"></span>
+                        </div>
                     </div>
                     <div class="signal-row">
                         <span class="sig-label">Take Profit:</span>
@@ -1592,8 +1678,9 @@
                 </div>
             </div>
 
-            <div id="tab-simulator" class="tab-content" style="padding:0; overflow:hidden;">
-                <div class="sim-app-container">
+            <div id="tab-simulator" class="tab-content"
+                style="padding:0; height: 100%; display: none; flex-direction: column;">
+                <div class="sim-app-container" style="flex: 1; display: flex; flex-direction: column; height: 100%;">
                     <div class="sim-app-header"
                         style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-subtle);">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -1650,15 +1737,17 @@
                         <!-- Spread -->
                         <div style="display:flex; align-items:center; gap:6px; flex-shrink: 0;">
                             <div
-                                style="font-size:0.6rem; color:#848e9c; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; white-space:nowrap;">
-                                Spread</div>
+                                style="font-size:0.6rem; color:#848e9c; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; white-space:nowrap; display:flex; flex-direction:column;">
+                                <span data-agent-tip="L1 OBSERVATION: Cost Monitoring" class="tip-obs">Spread</span>
+                            </div>
                             <div id="sim-spread"
                                 style="font-family:var(--font-mono); font-weight:700; color:white; font-size:0.75rem;">
                                 0.0</div>
                         </div>
 
                         <!-- Action Buttons -->
-                        <div style="display:flex; gap:8px; flex:1; justify-content:flex-end; align-items:center;">
+                        <div style="display:flex; gap:8px; flex:1; justify-content:flex-end; align-items:center; position:relative;"
+                            data-agent-tip="L3 ADVISORY: Risk Guidance Active" class="tip-adv">
                             <button onclick="manualTrade('SELL')"
                                 style="background:#f6465d; border:none; color:white; padding:6px 14px; border-radius:6px; cursor:pointer; min-width:85px; text-align:center; transition: 0.2s;">
                                 <div style="font-size:0.85rem; font-weight:800; line-height:1;">SELL</div>
@@ -1802,7 +1891,7 @@
             </div>
 
             <div id="neural-console"
-                style="flex: 1; display: flex; flex-direction: column; overflow: hidden; min-height: 0; position: relative;">
+                style="height: 100%; display: flex; flex-direction: column; overflow: hidden; position: relative;">
 
                 <div class="section-header" style="flex-shrink: 0; padding: 1.5rem 1.5rem 0.5rem 1.5rem;">
                     <div style="display:flex; align-items:center; gap:10px;">
@@ -1888,9 +1977,11 @@
 
         function switchTab(id, btn) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
             btn.classList.add('active');
-            document.getElementById(`tab-${id}`).classList.add('active');
+            const target = document.getElementById(`tab-${id}`);
+            target.style.display = (id === 'simulator') ? 'flex' : 'block';
+            target.classList.add('active');
         }
 
         function isMarketClosed() {
