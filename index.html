@@ -2528,7 +2528,7 @@
             const side = (s.side || '').toUpperCase();
 
             // 1. Check for real-time hits if signal is active/waiting
-            if (currentPrice && (status === 'WAITING' || status === 'WAITING_FOR_ENTRY' || status === 'ACTIVE' || status === 'ENTRY_HIT')) {
+            if (currentPrice && (['WAITING', 'WAITING_FOR_ENTRY', 'PUBLISHED', 'ACTIVE', 'ENTRY_HIT'].includes(status))) {
                 const entry = parseFloat(s.entry);
                 const tp = parseFloat(s.tp);
                 const sl = parseFloat(s.sl);
@@ -2545,12 +2545,14 @@
             }
 
             // 2. Map final results
-            if (result === 'PROFIT') return 'TP Hit';
-            if (result === 'LOSS') return 'SL Hit';
+            if (result === 'PROFIT' || status === 'CLOSED_TP') return 'TP Hit';
+            if (result === 'LOSS' || status === 'CLOSED_SL') return 'SL Hit';
+            if (status === 'CLOSED_TIMEOUT') return 'Timeout';
+            if (status === 'EXPIRED' || result === 'CANCELLED') return 'Expired';
 
             // 3. Map transitions
             if (status === 'ACTIVE' || status === 'ENTRY_HIT') return 'Entry Hit';
-            if (status === 'WAITING' || status === 'WAITING_FOR_ENTRY') return 'Waiting...';
+            if (status === 'WAITING' || status === 'WAITING_FOR_ENTRY' || status === 'PUBLISHED') return 'Waiting...';
 
             return 'Closed';
         }

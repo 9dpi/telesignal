@@ -132,7 +132,7 @@ app.get('/api/signals', async (req, res) => {
         const { data: liveSigs, error: liveErr } = await supabase
             .from('fx_signals')
             .select('*')
-            .in('status', ['WAITING_FOR_ENTRY', 'ACTIVE', 'WAITING'])
+            .in('status', ['WAITING_FOR_ENTRY', 'ACTIVE', 'WAITING', 'PUBLISHED', 'ENTRY_HIT'])
             .gte('generated_at', START_DATE)
             .order('generated_at', { ascending: false })
             .limit(1);
@@ -145,7 +145,7 @@ app.get('/api/signals', async (req, res) => {
         const { data: history, error: histErr } = await supabase
             .from('fx_signals')
             .select('*')
-            .in('status', ['CLOSED', 'CANCELLED', 'EXPIRED'])
+            .in('status', ['CLOSED', 'CANCELLED', 'EXPIRED', 'CLOSED_TP', 'CLOSED_SL', 'CLOSED_TIMEOUT'])
             .gte('generated_at', START_DATE)
             .order('generated_at', { ascending: false })
             .limit(50);
