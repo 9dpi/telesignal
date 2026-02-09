@@ -2053,7 +2053,7 @@
                         tp: s.take_profit || s.tp,
                         sl: s.stop_loss || s.sl,
                         status: s.status,
-                        conf: calcConfidence(s.release_confidence || s.ai_confidence || 0),
+                        conf: calcConfidence(s.release_confidence || 0),
                         generatedAt: s.generated_at ? new Date(s.generated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--',
                         closedAt: s.closed_at ? new Date(s.closed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--',
                         validUntil: s.valid_until ? new Date(s.valid_until).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--'
@@ -2073,7 +2073,7 @@
                     sl: s.stop_loss || s.sl,
                     result: s.result || 'UNKNOWN',
                     status: s.status,
-                    conf: calcConfidence(s.release_confidence || s.ai_confidence || 0),
+                    conf: calcConfidence(s.release_confidence || 0),
                     generatedAt: s.generated_at ? new Date(s.generated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--',
                     closedAt: s.closed_at ? new Date(s.closed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--'
                 }));
@@ -2201,7 +2201,10 @@
             document.getElementById('view-entry').textContent = Number(displaySig.entry).toFixed(5);
             document.getElementById('view-tp').textContent = Number(displaySig.tp).toFixed(5);
             document.getElementById('view-sl').textContent = Number(displaySig.sl).toFixed(5);
-            document.getElementById('view-conf').textContent = `${displaySig.conf}%`;
+            const confEl = document.getElementById('view-conf');
+            confEl.textContent = displaySig.conf > 0 ? `${displaySig.conf}%` : '--%';
+            confEl.style.color = isHistorical ? 'var(--text-secondary)' : 'var(--quantix-accent)';
+            confEl.style.opacity = isHistorical ? '0.5' : '1';
 
             // Valid Until might not be in historical objects, handle gracefully
             const validTime = displaySig.validUntil || displaySig.closedAt || '--:--';
