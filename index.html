@@ -2053,7 +2053,7 @@
                         tp: s.take_profit || s.tp,
                         sl: s.stop_loss || s.sl,
                         status: s.status,
-                        conf: calcConfidence(s.release_confidence || 0),
+                        conf: calcConfidence(s.release_confidence || s.ai_confidence || 0),
                         generatedAt: s.generated_at ? new Date(s.generated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--',
                         closedAt: s.closed_at ? new Date(s.closed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--',
                         validUntil: s.valid_until ? new Date(s.valid_until).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--'
@@ -2073,7 +2073,7 @@
                     sl: s.stop_loss || s.sl,
                     result: s.result || 'UNKNOWN',
                     status: s.status,
-                    conf: calcConfidence(s.release_confidence || 0),
+                    conf: calcConfidence(s.release_confidence || s.ai_confidence || 0),
                     generatedAt: s.generated_at ? new Date(s.generated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--',
                     closedAt: s.closed_at ? new Date(s.closed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--'
                 }));
