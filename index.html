@@ -1595,6 +1595,7 @@
                 <div style="display:flex; gap: 4px;">
                     <div class="tab-btn active" onclick="switchTab('terminal', this)">Execution Terminal</div>
                     <div class="tab-btn" onclick="switchTab('simulator', this)">Trading Simulator</div>
+                    <div class="tab-btn" onclick="switchTab('logs', this)">Logs</div>
                 </div>
                 <div class="tg-connector">
                     <div style="display:flex; align-items:center; gap:8px;">
@@ -1859,6 +1860,36 @@
                 </div>
             </div>
 
+            <!-- Logs Tab Content -->
+            <div id="tab-logs" class="tab-content"
+                style="padding:0; height: 100%; display: none; flex-direction: column;">
+                <div class="section-container">
+                    <div class="section-header">
+                        <div class="section-title">Validation Logs</div>
+                        <button onclick="fetchLogs()"
+                            style="background:transparent; border:none; color:var(--text-secondary); cursor:pointer;"
+                            title="Refresh Logs">
+                            <i data-lucide="refresh-cw" size="14"></i>
+                        </button>
+                    </div>
+                    <div class="content-scroller">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width:160px">Timestamp</th>
+                                    <th style="width:80px">Signal ID</th>
+                                    <th style="width:100px">Type</th>
+                                    <th style="width:90px">Val Price</th>
+                                    <th style="width:120px">Status</th>
+                                    <th>Details</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logs-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
         </section>
 
         <aside class="right-panel"
@@ -1980,8 +2011,82 @@
             document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
             btn.classList.add('active');
             const target = document.getElementById(`tab-${id}`);
-            target.style.display = (id === 'simulator') ? 'flex' : 'block';
+
+            if (id === 'simulator' || id === 'logs') {
+                target.style.display = 'flex';
+                if (id === 'logs') fetchLogs();
+            } else {
+                target.style.display = 'block';
+            }
             target.classList.add('active');
+        }
+
+        async function fetchLogs() {
+            const tbody = document.getElementById('logs-body');
+            if (!tbody) return;
+
+            try {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:#475569">Loading validation data...</td></tr>';
+
+                // Add timeout
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+                const res = await fetch(`${API_BASE}/api/validation-logs?limit=50`, {
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+
+                const json = await res.json();
+
+                if (json.success && json.data) {
+                    tbody.innerHTML = '';
+                    if (json.data.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:#475569">No validation events recorded yet.</td></tr>';
+                        return;
+                    }
+
+                    json.data.forEach(log => {
+                        const tr = document.createElement('tr');
+
+                        const isDisc = log.is_discrepancy;
+                        const statusColor = isDisc ? '#f43f5e' : '#10b981'; // trade-down / trade-up (hardcoded for simplicity in innerHTML)
+                        const statusIcon = isDisc ? '⚠️' : '✅';
+                        const statusText = isDisc ? 'DISCREPANCY' : 'MATCH';
+
+                        // Parse timestamp
+                        let ts = log.created_at;
+                        try {
+                            ts = new Date(log.created_at).toLocaleString();
+                        } catch (e) { }
+
+                        // Format details
+                        let details = '';
+                        if (log.meta_data) {
+                            if (typeof log.meta_data === 'string') details = log.meta_data;
+                            else details = JSON.stringify(log.meta_data);
+
+                            // Truncate
+                            if (details.length > 60) details = details.substring(0, 60) + '...';
+                        }
+
+                        tr.innerHTML = `
+                            <td style="color:#64748b; font-family:var(--font-mono); font-size:0.75rem">${ts}</td>
+                            <td style="color:var(--quantix-accent)">${log.signal_id ? log.signal_id.slice(0, 4) : '--'}</td>
+                            <td>${log.check_type || 'UNKNOWN'}</td>
+                            <td style="font-family:var(--font-mono)">${Number(log.validator_price).toFixed(5)}</td>
+                            <td style="color:${statusColor}; font-weight:700;">${statusIcon} ${statusText}</td>
+                            <td style="color:#64748b; font-size:0.7rem; font-family:var(--font-mono);" title="${details}">${details}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px; color:#f43f5e">Error: ${json.error || 'Unknown error'}</td></tr>`;
+                }
+            } catch (e) {
+                console.error("Log fetch error:", e);
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px; color:#f43f5e">Connection Error: ${e.message}</td></tr>`;
+            }
         }
 
         function isMarketClosed() {
