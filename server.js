@@ -118,6 +118,41 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// API: Fetch Validation Logs
+app.get('/api/validation-logs', async (req, res) => {
+    try {
+        if (!supabase) {
+            return res.json({ success: false, message: 'Supabase not connected' });
+        }
+        const limit = parseInt(req.query.limit) || 50;
+
+        const { data, error } = await supabase
+            .from('validation_events')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(limit);
+
+        if (error) throw error;
+
+        res.json({ success: true, data });
+    } catch (err) {
+        console.error("Validation Logs Error:", err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// Fallback for direct access without /api prefix
+app.get('/validation-logs', async (req, res) => {
+    try {
+        if (!supabase) return res.status(500).json({ success: false });
+        const { data, error } = await supabase.from('validation_events').select('*').order('created_at', { ascending: false }).limit(50);
+        if (error) throw error;
+        res.json({ success: true, data });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
 // API: Fetch Signals
 app.get('/api/signals', async (req, res) => {
     try {
