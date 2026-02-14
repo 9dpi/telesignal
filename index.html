@@ -2033,8 +2033,12 @@
                 const timeoutId = setTimeout(() => controller.abort(), 8000);
 
                 // Try primary endpoint first
-                let res = await fetch(`${API_V1}/validation-logs?limit=50`, { signal: controller.signal });
+                let res = await fetch(`${API_BASE}/api/validation-logs?limit=50`, { signal: controller.signal });
 
+                if (res.status === 404) {
+                    console.log("Validation logs 404, fallback...");
+                    res = await fetch(`${API_BASE}/validation-logs?limit=50`, { signal: controller.signal });
+                }
                 clearTimeout(timeoutId);
 
                 const json = await res.json();
@@ -2123,9 +2127,8 @@
             return Math.round(val);
         }
 
-        // CONFIG: Quantix AI Core Backend (Source of Truth)
-        const API_BASE = 'https://quantixaicore-production.up.railway.app';
-        const API_V1 = `${API_BASE}/api/v1`;
+        // CONFIG: Railway Backend API
+        const API_BASE = 'https://telesignal-production.up.railway.app';
 
         async function syncDatabase() {
             try {
@@ -2133,16 +2136,21 @@
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 8000);
 
-                const res = await fetch(`${API_V1}/signals/latest`, {
+                const res = await fetch(`${API_BASE}/api/signals`, {
                     signal: controller.signal,
                     headers: {
                         'Accept': 'application/json',
+                        'Content-Type': 'application/json'
                     }
                 });
                 clearTimeout(timeoutId);
 
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                }
+
                 const json = await res.json();
-                if (!json.success) return;
+                if (!json.success) throw new Error(json.message);
 
                 if (json.active) {
                     const s = json.active;
@@ -2796,14 +2804,13 @@
             addLog(`Linker: Registering ${phone} with Quantix Core...`, "sys");
 
             try {
-                const formatPhone = phone.replace(/\D/g, ''); // Ensure formatPhone is defined
-                const response = await fetch(`${API_V1}/register-telegram`, {
+                const response = await fetch(`${API_BASE}/api/register-telegram`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ phone: formatPhone })
+                    body: JSON.stringify({ phone })
                 });
 
-                const json = await response.json(); // Corrected from res.json()
+                const json = await response.json();
                 if (json.success) {
                     addLog(`Success: Registered ${phone}`, 'success');
 
