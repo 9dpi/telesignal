@@ -2033,12 +2033,8 @@
                 const timeoutId = setTimeout(() => controller.abort(), 8000);
 
                 // Try primary endpoint first
-                let res = await fetch(`${API_BASE}/api/validation-logs?limit=50`, { signal: controller.signal });
+                let res = await fetch(`${API_V1}/validation-logs?limit=50`, { signal: controller.signal });
 
-                if (res.status === 404) {
-                    console.log("Validation logs 404, fallback...");
-                    res = await fetch(`${API_BASE}/validation-logs?limit=50`, { signal: controller.signal });
-                }
                 clearTimeout(timeoutId);
 
                 const json = await res.json();
@@ -2127,8 +2123,9 @@
             return Math.round(val);
         }
 
-        // CONFIG: Railway Backend API
-        const API_BASE = 'https://telesignal-production.up.railway.app';
+        // CONFIG: Quantix AI Core Backend (Source of Truth)
+        const API_BASE = 'https://quantixaicore-production.up.railway.app';
+        const API_V1 = `${API_BASE}/api/v1`;
 
         async function syncDatabase() {
             try {
@@ -2136,7 +2133,7 @@
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 8000);
 
-                const res = await fetch(`${API_BASE}/api/signals`, {
+                const res = await fetch(`${API_V1}/signals`, {
                     signal: controller.signal,
                     headers: {
                         'Accept': 'application/json',
@@ -2805,13 +2802,14 @@
             addLog(`Linker: Registering ${phone} with Quantix Core...`, "sys");
 
             try {
-                const res = await fetch(`${API_BASE}/api/register-telegram`, {
+                const formatPhone = phone.replace(/\D/g, ''); // Ensure formatPhone is defined
+                const response = await fetch(`${API_V1}/register-telegram`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ phone })
+                    body: JSON.stringify({ phone: formatPhone })
                 });
 
-                const json = await res.json();
+                const json = await response.json(); // Corrected from res.json()
                 if (json.success) {
                     addLog(`Success: Registered ${phone}`, 'success');
 
