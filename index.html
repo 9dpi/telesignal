@@ -2133,21 +2133,16 @@
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 8000);
 
-                const res = await fetch(`${API_V1}/signals`, {
+                const res = await fetch(`${API_V1}/signals/latest`, {
                     signal: controller.signal,
                     headers: {
                         'Accept': 'application/json',
-                        'Content-Type': 'application/json'
                     }
                 });
                 clearTimeout(timeoutId);
 
-                if (!res.ok) {
-                    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-                }
-
                 const json = await res.json();
-                if (!json.success) throw new Error(json.message);
+                if (!json.success) return;
 
                 if (json.active) {
                     const s = json.active;
@@ -2170,8 +2165,7 @@
                 } else {
                     data.active = null;
                 }
-
-                data.sigs = json.history.map(s => ({
+                data.sigs = (json.history || []).map(s => ({
                     id: s.id,
                     side: s.direction || s.side,
                     entry: s.entry_price || s.entry,
