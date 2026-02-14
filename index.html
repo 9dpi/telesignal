@@ -2032,9 +2032,13 @@
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 8000);
 
-                const res = await fetch(`${API_BASE}/api/validation-logs?limit=50`, {
-                    signal: controller.signal
-                });
+                // Try primary endpoint first
+                let res = await fetch(`${API_BASE}/api/validation-logs?limit=50`, { signal: controller.signal });
+
+                if (res.status === 404) {
+                    console.log("Validation logs 404, fallback...");
+                    res = await fetch(`${API_BASE}/validation-logs?limit=50`, { signal: controller.signal });
+                }
                 clearTimeout(timeoutId);
 
                 const json = await res.json();
