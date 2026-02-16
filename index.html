@@ -2082,10 +2082,22 @@
                         const isDisc = log.is_discrepancy;
                         const statusColor = isDisc ? '#f43f5e' : '#10b981';
                         const statusIcon = isDisc ? '⚠️' : '✅';
-                        const statusText = isDisc ? 'DISCREPANCY' : 'MATCH';
+                        const statusText = isDisc ? 'FALSE' : 'TRUE'; // is_discrepancy: False -> TRUE match
+
                         let ts = new Date(log.created_at).toLocaleString();
-                        let details = log.meta_data ? (typeof log.meta_data === 'string' ? log.meta_data : JSON.stringify(log.meta_data)) : '';
-                        if (details.length > 60) details = details.substring(0, 60) + '...';
+
+                        // Proof (Candle Data)
+                        let proof = '';
+                        if (log.validator_candle) {
+                            const c = log.validator_candle;
+                            // Format: O:1.05 H:1.06 L:1.04 C:1.05
+                            proof = `O:${c.open} H:${c.high} L:${c.low} C:${c.close}`;
+                        } else {
+                            proof = 'No Candle Data';
+                        }
+
+                        // Meta Details
+                        let meta = log.meta_data ? (typeof log.meta_data === 'string' ? log.meta_data : JSON.stringify(log.meta_data)) : '';
 
                         tr.innerHTML = `
                             <td style="color:#64748b; font-family:var(--font-mono); font-size:0.75rem">${ts}</td>
@@ -2093,7 +2105,10 @@
                             <td>${log.check_type || 'UNKNOWN'}</td>
                             <td style="font-family:var(--font-mono)">${Number(log.validator_price || 0).toFixed(5)}</td>
                             <td style="color:${statusColor}; font-weight:700;">${statusIcon} ${statusText}</td>
-                            <td style="color:#64748b; font-size:0.7rem; font-family:var(--font-mono);" title="${details}">${details}</td>
+                            <td style="color:#64748b; font-size:0.7rem; font-family:var(--font-mono);">
+                                <div style="font-weight:bold; color:#94a3b8">Proof: ${proof}</div>
+                                <div style="margin-top:2px;">${meta}</div>
+                            </td>
                         `;
                         tbody.appendChild(tr);
                     });
