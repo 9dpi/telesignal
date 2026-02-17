@@ -2064,10 +2064,8 @@
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 8000);
 
-                let res = await fetch(`${API_BASE}/api/validation-logs?limit=50`, { signal: controller.signal });
-                if (res.status === 404) {
-                    res = await fetch(`${API_BASE}/validation-logs?limit=50`, { signal: controller.signal });
-                }
+                const AI_CORE_API = 'https://quantixaicore-production.up.railway.app/api/v1';
+                let res = await fetch(`${AI_CORE_API}/validation-logs?limit=50`, { signal: controller.signal });
                 clearTimeout(timeoutId);
 
                 const json = await res.json();
