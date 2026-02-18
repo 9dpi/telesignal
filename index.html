@@ -2080,7 +2080,7 @@
                         const isDisc = log.is_discrepancy;
                         const statusColor = isDisc ? '#f43f5e' : '#10b981';
                         const statusIcon = isDisc ? '⚠️' : '✅';
-                        const statusText = isDisc ? 'FALSE' : 'TRUE'; // is_discrepancy: False -> TRUE match
+                        const statusText = isDisc ? 'PRICE MISMATCH' : 'PRICE MATCHED'; // is_discrepancy: True -> Mismatch
 
                         let ts = new Date(log.created_at).toLocaleString();
 
