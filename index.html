@@ -1862,7 +1862,7 @@
 
             <!-- Logs Tab Content -->
             <div id="tab-logs" class="tab-content"
-                style="padding:0; height: 100%; display: none; flex-direction: column;">
+                style="padding:0; height: 100%; display: none; flex-direction: column; overflow: hidden;">
                 <!-- Validation Table (Trades) -->
                 <div class="section-container" style="flex: 1; min-height: 0; display: flex; flex-direction: column;">
                     <div class="section-header">
@@ -2064,7 +2064,7 @@
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 8000);
 
-                const AI_CORE_API = 'http://localhost:8080/api/v1';
+                const AI_CORE_API = 'https://quantixaicore-production.up.railway.app/api/v1';
                 let res = await fetch(`${AI_CORE_API}/validation-logs?limit=50`, { signal: controller.signal });
                 clearTimeout(timeoutId);
 
@@ -2120,7 +2120,7 @@
             const hbody = document.getElementById('heartbeat-body');
             if (!hbody) return;
 
-            const AI_CORE_API = 'http://localhost:8080/api/v1';
+            const AI_CORE_API = 'https://quantixaicore-production.up.railway.app/api/v1';
 
             try {
                 const res = await fetch(`${AI_CORE_API}/analysis-logs?limit=20`);
@@ -2187,7 +2187,7 @@
         }
 
         // CONFIG: Quantix AI Core Local API
-        const API_BASE = 'http://localhost:8080/api/v1';
+        const API_BASE = 'https://quantixaicore-production.up.railway.app/api/v1';
 
         async function syncDatabase() {
             try {
