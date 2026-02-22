@@ -38,21 +38,40 @@ class TradingSimulator {
 
     // --- Core Trading Logic ---
 
-    updatePrice(price) {
-        this.currentPrice = parseFloat(price);
+    // Spread config (EURUSD typical 1.5 - 2.0 pips)
+    getSPREAD() {
+        return 0.00020; // Fixed 2.0 pips for simulation consistency
+    }
+
+    updatePrice(midPrice) {
+        this.currentPrice = parseFloat(midPrice);
+        const halfSpread = this.getSPREAD() / 2;
+
+        // MT5 Logic:
+        // BID = Price you SELL at
+        // ASK = Price you BUY at
+        this.bid = this.currentPrice - halfSpread;
+        this.ask = this.currentPrice + halfSpread;
+
         this.checkPositions();
         this.updateUI();
     }
 
-    openPosition(side, symbol, entryPrice, tp, sl, size = 1.0, signalId = null) {
+    openPosition(side, symbol, entryMidPrice, tp, sl, size = 1.0, signalId = null) {
+        const halfSpread = this.getSPREAD() / 2;
+
+        // MT5 Rule: BUY @ Ask, SELL @ Bid
+        const executionPrice = side === 'BUY'
+            ? parseFloat(entryMidPrice) + halfSpread
+            : parseFloat(entryMidPrice) - halfSpread;
+
         const position = {
             id: 'ord_' + Date.now(),
             ticket: Math.floor(Math.random() * 1000000),
             openTime: new Date().toISOString(),
             symbol: symbol,
-            side: side.toUpperCase(), // 'BUY' or 'SELL'
-            entryPrice: parseFloat(entryPrice),
-            currentPrice: parseFloat(entryPrice),
+            side: side.toUpperCase(),
+            entryPrice: executionPrice, // Store the actual MT5 execution price
             tp: parseFloat(tp),
             sl: parseFloat(sl),
             size: size,
@@ -63,7 +82,7 @@ class TradingSimulator {
 
         this.positions.push(position);
         this.saveState();
-        this.showNotification(`Order Opened: ${side} ${symbol} @ ${entryPrice}`);
+        this.showNotification(`Order Opened: ${side} ${symbol} @ ${executionPrice.toFixed(5)} (Inc. Spread)`);
         this.updateUI();
     }
 
@@ -73,52 +92,51 @@ class TradingSimulator {
 
         const pos = this.positions[idx];
         pos.closeTime = new Date().toISOString();
-        pos.closePrice = this.currentPrice;
+
+        // MT5 Rule: Close BUY @ Bid, Close SELL @ Ask
+        pos.closePrice = pos.side === 'BUY' ? this.bid : this.ask;
         pos.reason = reason;
 
         // Calculate Final P&L
         const multiplier = pos.side === 'BUY' ? 1 : -1;
-        const pipValue = 10; // Standard pip value for 1 lot EURUSD (simplified)
+        const pipValue = 10; // $10 per lot per pip
         const pips = (pos.closePrice - pos.entryPrice) * 10000;
-        pos.profit = pips * multiplier * pos.size * pipValue; // Approx profit in USD
+        pos.profit = pips * multiplier * pos.size * pipValue;
 
-        // Update Balance
         this.balance += pos.profit;
-
-        // Move to History
         this.history.unshift(pos);
         this.positions.splice(idx, 1);
 
         this.saveState();
         this.showNotification(`Order Closed: ${pos.profit >= 0 ? '+' : ''}${pos.profit.toFixed(2)}$ (${reason})`);
-
-        // TODO: Send to Google Sheet here
-        // this.logToSheet(pos);
     }
 
     checkPositions() {
-        if (!this.currentPrice || this.currentPrice <= 0) return;
+        if (!this.bid || !this.ask) return;
 
-        // Clone array to avoid modification issues while iterating
         [...this.positions].forEach(pos => {
-            // Update Floating P&L
+            // Update Floating P&L (Current exit price)
+            const exitPrice = pos.side === 'BUY' ? this.bid : this.ask;
             const multiplier = pos.side === 'BUY' ? 1 : -1;
-            const pipDiff = (this.currentPrice - pos.entryPrice) * 10000;
-            // 1 Lot = $10 per pip (Simplified for EURUSD)
+            const pipDiff = (exitPrice - pos.entryPrice) * 10000;
             pos.pnl = pipDiff * multiplier * pos.size * 10;
 
             // Check TP
             if (pos.tp > 0) {
-                if ((pos.side === 'BUY' && this.currentPrice >= pos.tp) ||
-                    (pos.side === 'SELL' && this.currentPrice <= pos.tp)) {
+                // BUY hits TP when Bid rises to TP
+                // SELL hits TP when Ask falls to TP
+                if ((pos.side === 'BUY' && this.bid >= pos.tp) ||
+                    (pos.side === 'SELL' && this.ask <= pos.tp)) {
                     this.closePosition(pos.id, 'TP_HIT');
                 }
             }
 
             // Check SL
             if (pos.sl > 0) {
-                if ((pos.side === 'BUY' && this.currentPrice <= pos.sl) ||
-                    (pos.side === 'SELL' && this.currentPrice >= pos.sl)) {
+                // BUY hits SL when Bid falls to SL
+                // SELL hits SL when Ask rises to SL
+                if ((pos.side === 'BUY' && this.bid <= pos.sl) ||
+                    (pos.side === 'SELL' && this.ask >= pos.sl)) {
                     this.closePosition(pos.id, 'SL_HIT');
                 }
             }

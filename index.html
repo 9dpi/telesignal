@@ -142,6 +142,57 @@
             align-items: flex-end;
         }
 
+        /* Tooltip Master System */
+        [data-tooltip] {
+            position: relative;
+            cursor: help;
+        }
+
+        [data-tooltip]::before {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            background: #1e293b;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            white-space: normal;
+            min-width: 180px;
+            max-width: 250px;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-subtle);
+            text-align: center;
+            line-height: 1.4;
+            font-family: var(--font-main);
+        }
+
+        [data-tooltip]::after {
+            content: "";
+            position: absolute;
+            bottom: 110%;
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            border-width: 6px;
+            border-style: solid;
+            border-color: #1e293b transparent transparent transparent;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        [data-tooltip]:hover::before,
+        [data-tooltip]:hover::after {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
         .stat-label {
             font-size: 0.6rem;
             color: var(--text-secondary);
@@ -1505,33 +1556,43 @@
 
                 <div class="sig-section">
                     <div class="signal-row" style="margin-bottom:12px;">
-                        <span class="sig-label">Status:</span>
+                        <span class="sig-label"
+                            data-tooltip="The current lifecycle phase of the trade signal.">Status:</span>
                         <span id="view-status" class="sig-value" style="color:var(--quantix-accent)"></span>
                     </div>
                     <div class="signal-row">
-                        <span class="sig-label">Entry Price:</span>
+                        <span class="sig-label"
+                            data-tooltip="Target price to enter the trade. The signal becomes active only if market hits this price.">Entry
+                            Price:</span>
                         <div style="display:flex; align-items:center; gap:6px;">
-                            <span id="view-entry" class="sig-value mono"
-                                data-agent-tip="L2 REASONING: Calculated Entry Reference" class="tip-reason"></span>
+                            <span id="view-entry" class="sig-value mono"></span>
                         </div>
                     </div>
                     <div class="signal-row">
-                        <span class="sig-label">Take Profit:</span>
+                        <span class="sig-label"
+                            data-tooltip="Profit Target: The trade will automatically close with profit if the price reaches this level.">Take
+                            Profit:</span>
                         <span id="view-tp" class="sig-value mono" style="color:var(--trade-up)"></span>
                     </div>
                     <div class="signal-row">
-                        <span class="sig-label">Stop Loss:</span>
+                        <span class="sig-label"
+                            data-tooltip="Risk Limit: The trade will automatically close with a small loss to protect your capital if the price hits this level.">Stop
+                            Loss:</span>
                         <span id="view-sl" class="sig-value mono" style="color:var(--trade-down)"></span>
                     </div>
                 </div>
 
                 <div class="sig-section">
                     <div class="signal-row">
-                        <div class="data-label">AI Probability</div>
+                        <div class="data-label"
+                            data-tooltip="Quantix AI Confidence score. Higher scores indicate stronger trend alignment and lower volatility risk.">
+                            AI Probability</div>
                         <span id="view-conf" class="sig-value" style="color:var(--quantix-accent)"></span>
                     </div>
                     <div class="signal-row">
-                        <span class="sig-label">Valid Until:</span>
+                        <span class="sig-label"
+                            data-tooltip="Signals are time-sensitive. If Entry Price isn't hit by this time, the setup is invalidated.">Valid
+                            Until:</span>
                         <span id="view-valid" class="sig-value"></span>
                     </div>
                 </div>
@@ -1720,7 +1781,8 @@
                         style="border-top:none; border-bottom:1px solid #1e2329; background: #161a1e; padding: 10px 16px; display: flex; align-items: center; gap: 12px; flex-wrap: nowrap; overflow-x: auto;">
 
                         <!-- Lot Size -->
-                        <div style="display:flex; align-items:center; gap:8px; flex-shrink: 0;">
+                        <div style="display:flex; align-items:center; gap:8px; flex-shrink: 0;"
+                            data-tooltip="Trade Volume: 1.00 lot = 100,000 units. A 1-pip movement equals approximately $10 profit/loss.">
                             <div
                                 style="font-size:0.6rem; color:#848e9c; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; white-space:nowrap;">
                                 Lot</div>
@@ -1736,10 +1798,11 @@
                         </div>
 
                         <!-- Spread -->
-                        <div style="display:flex; align-items:center; gap:6px; flex-shrink: 0;">
+                        <div style="display:flex; align-items:center; gap:6px; flex-shrink: 0;"
+                            data-tooltip="The difference between Buy (Ask) and Sell (Bid) price. This is the broker's fee for executing your trade.">
                             <div
                                 style="font-size:0.6rem; color:#848e9c; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; white-space:nowrap; display:flex; flex-direction:column;">
-                                <span data-agent-tip="L1 OBSERVATION: Cost Monitoring" class="tip-obs">Spread</span>
+                                <span>Spread</span>
                             </div>
                             <div id="sim-spread"
                                 style="font-family:var(--font-mono); font-weight:700; color:white; font-size:0.75rem;">
@@ -1747,9 +1810,10 @@
                         </div>
 
                         <!-- Action Buttons -->
-                        <div style="display:flex; gap:8px; flex:1; justify-content:flex-end; align-items:center; position:relative;"
-                            data-agent-tip="L3 ADVISORY: Risk Guidance Active" class="tip-adv">
+                        <div
+                            style="display:flex; gap:8px; flex:1; justify-content:flex-end; align-items:center; position:relative;">
                             <button onclick="manualTrade('SELL')"
+                                data-tooltip="Sell (Short): Profit if price goes DOWN. Executed at the BID price."
                                 style="background:#f6465d; border:none; color:white; padding:6px 14px; border-radius:6px; cursor:pointer; min-width:85px; text-align:center; transition: 0.2s;">
                                 <div style="font-size:0.85rem; font-weight:800; line-height:1;">SELL</div>
                                 <div id="sim-price-sell"
@@ -1757,6 +1821,7 @@
                                     --.-----</div>
                             </button>
                             <button onclick="manualTrade('BUY')"
+                                data-tooltip="Buy (Long): Profit if price goes UP. Executed at the ASK price."
                                 style="background:#0ecb81; border:none; color:white; padding:6px 14px; border-radius:6px; cursor:pointer; min-width:85px; text-align:center; transition: 0.2s;">
                                 <div style="font-size:0.85rem; font-weight:800; line-height:1;">BUY</div>
                                 <div id="sim-price-buy"
@@ -1795,9 +1860,11 @@
                                 <div class="sim-pos-tab" onclick="switchSimSubTab('guide', this)">Simulator Guide</div>
                             </div>
                             <div style="font-size:0.75rem; color:#848e9c;">
-                                Balance: <span id="sim-balance-app"
-                                    style="color:white; font-weight:700">$10,000.00</span>
-                                | PnL: <span id="sim-pnl-app" style="color:#0ecb81">$0.00</span>
+                                <span data-tooltip="Balance: Funds currently in your account.">Balance:</span> <span
+                                    id="sim-balance-app" style="color:white; font-weight:700">$10,000.00</span>
+                                | <span
+                                    data-tooltip="PnL: Current unrealized profit or loss from your open trades.">PnL:</span>
+                                <span id="sim-pnl-app" style="color:#0ecb81">$0.00</span>
                             </div>
                         </div>
                         <div id="sim-positions-list"></div>
