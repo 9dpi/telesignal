@@ -1013,8 +1013,49 @@
         }
 
         .sim-pos-tab.active {
-            background: #2b3139;
+            background: var(--quantix-accent);
             color: white;
+        }
+
+        /* Toast Notification */
+        .sim-toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ffffff;
+            color: #000000;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            font-family: var(--font-mono);
+            z-index: 9999;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            animation: toast-in 0.3s ease, toast-out 0.3s ease 2.7s;
+            pointer-events: none;
+        }
+
+        @keyframes toast-in {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        @keyframes toast-out {
+            from {
+                opacity: 1;
+            }
+
+            to {
+                opacity: 0;
+            }
         }
 
         /* Position Card Restyling */
@@ -1857,6 +1898,7 @@
                             <div class="sim-pos-tabs">
                                 <div class="sim-pos-tab active" onclick="switchSimSubTab('positions', this)">Open
                                     Positions (<span id="sim-pos-count">0</span>)</div>
+                                <div class="sim-pos-tab" onclick="switchSimSubTab('history', this)">Trade History</div>
                                 <div class="sim-pos-tab" onclick="switchSimSubTab('guide', this)">Simulator Guide</div>
                             </div>
                             <div style="font-size:0.75rem; color:#848e9c;">
@@ -1868,6 +1910,7 @@
                             </div>
                         </div>
                         <div id="sim-positions-list"></div>
+                        <div id="sim-history-list" style="display:none; padding: 8px 16px; overflow-y: auto;"></div>
                         <div id="sim-guide-content"
                             style="display:none; color:#848e9c; font-size:0.8rem; line-height:1.4; padding:12px; height: 100%; overflow-y: auto;">
                             <h4 style="color:white; margin:0 0 15px 0; display:flex; align-items:center; gap:8px;">
@@ -3035,6 +3078,7 @@
 
             if (window.simulator) {
                 simulator.openPosition(side, 'EURUSD', data.price, tp, sl, lot);
+                addLog(`SIM: ${side} ${lot.toFixed(2)} lot EURUSD @ ${data.price.toFixed(5)} | TP: ${tp.toFixed(5)} | SL: ${sl.toFixed(5)}`, side === 'BUY' ? 'success' : 'danger');
             }
         }
 
@@ -3064,23 +3108,29 @@
                 if (countApp) countApp.textContent = this.positions.length;
 
                 if (list) {
-                    list.innerHTML = this.positions.filter(p => p.status === 'OPEN').map(pos => `
+                    list.innerHTML = this.positions.filter(p => p.status === 'OPEN').map(pos => {
+                        const pipDiff = pos.side === 'BUY'
+                            ? ((this.bid || this.currentPrice) - pos.entryPrice) * 10000
+                            : (pos.entryPrice - (this.ask || this.currentPrice)) * 10000;
+                        const pipsLabel = pipDiff >= 0 ? `+${pipDiff.toFixed(1)}` : pipDiff.toFixed(1);
+                        return `
                         <div class="sim-pos-card">
                             <div class="sim-pos-row">
                                 <div class="sim-pos-symbol">
                                     <i data-lucide="${pos.side === 'BUY' ? 'trending-up' : 'trending-down'}" 
                                        size="18" style="color:${pos.side === 'BUY' ? '#0ecb81' : '#f6465d'}"></i>
-                                    EURUSD
+                                    ${pos.side} EURUSD
                                 </div>
                                 <div class="sim-pos-pnl" style="color:${pos.pnl >= 0 ? '#0ecb81' : '#f6465d'}">
-                                    ${pos.pnl >= 0 ? '+' : ''}${pos.pnl.toFixed(2)}
+                                    ${pos.pnl >= 0 ? '+' : ''}$${Math.abs(pos.pnl).toFixed(2)}
+                                    <span style="font-size:0.65rem; opacity:0.8;"> (${pipsLabel} pips)</span>
                                 </div>
                             </div>
                             <div class="sim-pos-row">
                                 <div class="sim-pos-details">
-                                    ${pos.size.toFixed(2)} @ ${pos.entryPrice.toFixed(5)}
-                                    <span class="sim-tag">SL</span>
-                                    <span class="sim-tag">TP</span>
+                                    ${pos.size.toFixed(2)} lot @ ${pos.entryPrice.toFixed(5)}
+                                    <span class="sim-tag" style="color:#0ecb81;">TP ${pos.tp.toFixed(5)}</span>
+                                    <span class="sim-tag" style="color:#f6465d;">SL ${pos.sl.toFixed(5)}</span>
                                 </div>
                                 <div style="display:flex; gap:12px; align-items:center;">
                                     <button onclick="simulator.closePosition('${pos.id}')" 
@@ -3090,8 +3140,37 @@
                                 </div>
                             </div>
                         </div>
-                    `).join('');
+                    `}).join('');
                     lucide.createIcons();
+                }
+
+                // Render Trade History
+                const histList = document.getElementById('sim-history-list');
+                if (histList && this.history.length > 0) {
+                    histList.innerHTML = this.history.slice(0, 20).map(h => {
+                        const isWin = h.profit >= 0;
+                        const pips = h.side === 'BUY'
+                            ? (h.closePrice - h.entryPrice) * 10000
+                            : (h.entryPrice - h.closePrice) * 10000;
+                        return `
+                        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #1e2329; font-size:0.75rem;">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <span style="color:${h.side === 'BUY' ? '#0ecb81' : '#f6465d'}; font-weight:700;">${h.side}</span>
+                                <span style="color:#94a3b8;">${h.size.toFixed(2)} lot</span>
+                                <span style="color:#64748b; font-family:var(--font-mono);">${h.entryPrice.toFixed(5)} → ${h.closePrice.toFixed(5)}</span>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <span style="color:${isWin ? '#0ecb81' : '#f6465d'}; font-weight:700; font-family:var(--font-mono);">
+                                    ${isWin ? '+' : ''}$${h.profit.toFixed(2)}
+                                </span>
+                                <span style="padding:2px 6px; border-radius:4px; font-size:0.6rem; font-weight:700; background:${isWin ? 'rgba(14,203,129,0.1)' : 'rgba(246,70,93,0.1)'}; color:${isWin ? '#0ecb81' : '#f6465d'}">
+                                    ${h.reason || 'CLOSED'}
+                                </span>
+                            </div>
+                        </div>
+                    `}).join('');
+                } else if (histList) {
+                    histList.innerHTML = '<div style="padding:1rem; text-align:center; color:#94a3b8; font-size:0.8rem;">No trade history yet. Start trading!</div>';
                 }
             };
             simulator.init();
@@ -3103,13 +3182,19 @@
             btn.classList.add('active');
 
             const list = document.getElementById('sim-positions-list');
+            const histList = document.getElementById('sim-history-list');
             const guide = document.getElementById('sim-guide-content');
+
+            list.style.display = 'none';
+            histList.style.display = 'none';
+            guide.style.display = 'none';
 
             if (tab === 'positions') {
                 list.style.display = 'block';
-                guide.style.display = 'none';
+            } else if (tab === 'history') {
+                histList.style.display = 'block';
+                if (window.simulator) simulator.updateUI();
             } else {
-                list.style.display = 'none';
                 guide.style.display = 'block';
                 lucide.createIcons();
             }
