@@ -377,23 +377,25 @@
         .content-scroller {
             flex: 1;
             overflow-y: auto;
+            overflow-x: auto;
+            /* Prevent global scrollbar */
+            width: 100%;
         }
 
         /* Table Reset */
         table {
-            width: 98%;
-            margin: 0 auto;
-            /* Center the table */
-            min-width: 1000px;
-            /* Ensure table has breathing room */
+            width: 100%;
+            margin: 0;
             border-collapse: collapse;
             table-layout: fixed;
-            /* Force column widths */
+            min-width: 850px;
+            /* More responsive threshold */
         }
 
         th {
             text-align: left;
-            padding: 0.85rem 1.5rem;
+            padding: 0.85rem 0.75rem;
+            /* Tightened padding */
             font-size: 0.65rem;
             color: var(--text-secondary);
             text-transform: uppercase;
@@ -404,52 +406,43 @@
             white-space: nowrap;
         }
 
-        /* Column Widths Definition (10 columns total) */
+        /* Optimal Column Widths for responsive fit */
         th:nth-child(1) {
-            width: 80px;
+            width: 50px;
         }
 
-        /* ID */
         th:nth-child(2) {
-            width: 90px;
+            width: 85px;
         }
 
-        /* Created */
         th:nth-child(3) {
-            width: 70px;
+            width: 65px;
         }
 
-        /* Side */
         th:nth-child(4) {
-            width: 80px;
+            width: 60px;
         }
 
-        /* AI Score */
         th:nth-child(5) {
-            width: 100px;
+            width: 85px;
         }
 
-        /* Entry */
         th:nth-child(6) {
-            width: 100px;
-        }
-
-        /* TP */
-        th:nth-child(7) {
-            width: 100px;
-        }
-
-        /* SL */
-        th:nth-child(8) {
-            width: 110px;
-        }
-
-        /* Win/Loss */
-        th:nth-child(9) {
             width: 90px;
         }
 
-        /* Closed */
+        th:nth-child(7) {
+            width: 90px;
+        }
+
+        th:nth-child(8) {
+            width: 90px;
+        }
+
+        th:nth-child(9) {
+            width: 100px;
+        }
+
         th:nth-child(10) {
             width: 120px;
         }
