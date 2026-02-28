@@ -1291,6 +1291,52 @@
             color: var(--quantix-purple);
         }
 
+        /* Market Closed Notice */
+        .market-closed-notice {
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px dashed var(--border-subtle);
+            border-radius: 8px;
+            padding: 2rem 1.5rem;
+            margin: 1.5rem 0;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            text-align: center;
+            animation: fadeInNotice 0.5s ease-out;
+        }
+
+        @keyframes fadeInNotice {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .market-closed-notice i {
+            color: #f59e0b;
+            opacity: 0.8;
+        }
+
+        .market-closed-notice .notice-title {
+            color: #fff;
+            font-weight: 800;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .market-closed-notice .notice-msg {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            line-height: 1.6;
+        }
+
         .social-link {
             color: #475569;
             transition: all 0.2s ease;
@@ -1555,6 +1601,14 @@
                         style="position:absolute; right:0; top:50%; width:8px; height:8px; background:white; border-radius:50%; box-shadow:0 0 10px white; transform:translate(50%, -50%); display:none;">
                     </div>
                 </div>
+            </div>
+
+            <!-- Market Closed Notice -->
+            <div id="market-closed-notice" class="market-closed-notice">
+                <i data-lucide="clock-9" size="32"></i>
+                <div class="notice-title">Market Closed</div>
+                <div class="notice-msg">Quantix AI is currently in idle mode for the weekend. Systematic market analysis
+                    and signal generation will resume automatically when the market opens on Monday.</div>
             </div>
 
             <!-- Signal Template Container -->
@@ -2805,13 +2859,36 @@
             });
         }
 
-        // Real-time UTC Clock for Header
+        // Real-time UTC Clock & Market Status
         function updateHeaderClock() {
             const now = new Date();
             const utc = now.getUTCFullYear() + '-' + String(now.getUTCMonth() + 1).padStart(2, '0') + '-' + String(now.getUTCDate()).padStart(2, '0') + ' ' +
                 String(now.getUTCHours()).padStart(2, '0') + ':' + String(now.getUTCMinutes()).padStart(2, '0') + ':' + String(now.getUTCSeconds()).padStart(2, '0') + ' UTC';
             const el = document.getElementById('header-utc-clock');
             if (el) el.textContent = `[ ${utc} ]`;
+
+            // Check Market Status (Weekend)
+            const day = now.getUTCDay(); // 0: Sun, 6: Sat
+            const hours = now.getUTCHours();
+
+            // Market closes Friday 22:00 UTC, opens Sunday 22:00 UTC
+            let isClosed = false;
+            if (day === 6) isClosed = true; // Saturday
+            if (day === 5 && hours >= 22) isClosed = true; // Friday post-close
+            if (day === 0 && hours < 22) isClosed = true; // Sunday pre-open
+
+            const notice = document.getElementById('market-closed-notice');
+            if (notice) {
+                if (isClosed) {
+                    notice.style.display = 'flex';
+                    const scanText = document.getElementById('scanning-text');
+                    if (scanText && (scanText.textContent.includes('Initializing') || scanText.textContent.includes('Scanning'))) {
+                        scanText.textContent = 'Market Closed - System Idle';
+                    }
+                } else {
+                    notice.style.display = 'none';
+                }
+            }
         }
         setInterval(updateHeaderClock, 1000);
         updateHeaderClock();
