@@ -1536,6 +1536,138 @@
                 overflow-x: hidden !important;
             }
         }
+
+        /* 5W1H Modal Styling */
+        #signal-detail-modal {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .wh-section {
+            margin-bottom: 2px;
+        }
+
+        .wh-card {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 24px;
+            width: 100%;
+            max-width: 550px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+
+        .wh-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 15px;
+        }
+
+        .wh-title {
+            font-size: 0.65rem;
+            font-weight: 800;
+            color: var(--quantix-accent);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .wh-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .wh-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .wh-label {
+            font-size: 0.6rem;
+            color: #64748b;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .wh-value {
+            font-family: var(--font-mono);
+            font-weight: 700;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .wh-info-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+            align-items: flex-start;
+        }
+
+        .wh-icon-box {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            color: white;
+            font-weight: 800;
+            font-size: 0.8rem;
+        }
+
+        .wh-content {
+            flex: 1;
+        }
+
+        .wh-c-label {
+            font-size: 0.65rem;
+            font-weight: 800;
+            color: #94a3b8;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .wh-c-val {
+            font-size: 0.75rem;
+            color: #e2e8f0;
+            line-height: 1.4;
+        }
+
+        .wh-why-box {
+            background: rgba(56, 189, 248, 0.05);
+            border: 1px solid rgba(56, 189, 248, 0.1);
+            padding: 12px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .wh-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .wh-close:hover {
+            color: white;
+        }
     </style>
 </head>
 
@@ -1558,7 +1690,12 @@
 
         <div class="nav-links" id="mobile-nav">
             <a href="https://9dpi.github.io/quantix-ai-core/index.html" target="_blank" class="nav-link">Overview</a>
-            <a href="#" class="nav-link" style="color:#fff">Live System</a>
+            <div style="display:flex; align-items:center; gap: 4px;">
+                <a href="#" class="nav-link active-link" style="color:#fff">Live System</a>
+                <span
+                    style="background:var(--quantix-accent); color:white; padding:2px 6px; border-radius:4px; font-size:0.6rem; font-weight:800; letter-spacing:0.5px;">INSTITUTIONAL
+                    v3.8</span>
+            </div>
 
             <a href="https://9dpi.github.io/quantix-ai-core/api/index.html" target="_blank" class="nav-link">API</a>
             <a href="https://9dpi.github.io/quantix-ai-core/contact/index.html" target="_blank"
@@ -2171,7 +2308,7 @@
                 <div
                     style="margin-top: auto; padding: 1.5rem; border-top: 1px solid rgba(255,255,255,0.05); font-size: 0.6rem; color: #475569; display: flex; justify-content: space-between; opacity: 0.8;">
                     <span>SNC STATUS: OPTIMAL</span>
-                    <span>v2.1.2</span>
+                    <span>v3.8.1</span>
                 </div>
             </div>
         </aside>
@@ -2237,6 +2374,8 @@
             price: null,
             prevPrice: 0,
             sigs: [],
+            rawHistory: [],
+            rawActive: null,
             pHistory: [],
             active: null,
             currentPage: 1,
@@ -2417,7 +2556,11 @@
                     }
                 } else {
                     data.active = null;
+                    data.rawActive = null;
                 }
+                // Save raw history for 5W1H popup
+                data.rawHistory = json.history || [];
+                data.rawActive = json.active || null;
                 data.sigs = (json.history || []).map(s => ({
                     id: s.id,
                     side: s.direction || s.side,
@@ -3283,8 +3426,163 @@
 
         addLog("Quantix AI Core Link: ACTIVE", "success");
 
+        // 5W1H POPUP LOGIC
+        function openSignalDetail(sig) {
+            const modal = document.getElementById('signal-detail-modal');
+            if (!modal) return;
+
+            const entry = parseFloat(sig.entry_price || sig.entry || 0);
+            const tp = parseFloat(sig.tp || sig.take_profit || 0);
+            const sl = parseFloat(sig.sl || sig.stop_loss || 0);
+            const direction = (sig.direction || sig.side || 'BUY').toUpperCase();
+            const conf = Math.round((sig.release_confidence || sig.ai_confidence || 0) * 100);
+
+            // Pips calculations
+            const tpPips = Math.round(Math.abs(tp - entry) * 100000) / 10;
+            const slPips = Math.round(Math.abs(sl - entry) * 100000) / 10;
+
+            document.getElementById('modal-signal-id').textContent = `${sig.asset || 'EURUSD'} ${direction} · #${(sig.id || '').slice(0, 8)}`;
+
+            const badge = document.getElementById('modal-status-badge');
+            badge.textContent = sig.status || 'Active';
+            badge.style.background = 'rgba(2,132,199,0.1)'; badge.style.color = 'var(--quantix-accent)';
+
+            document.getElementById('modal-entry').textContent = entry.toFixed(5);
+            document.getElementById('modal-tp').textContent = tp.toFixed(5);
+            document.getElementById('modal-sl').textContent = sl.toFixed(5);
+
+            const meta = sig.signal_metadata || {};
+            document.getElementById('modal-what').innerHTML = `${direction} · Conf: <b>${conf}%</b> · TP: <span style="color:var(--trade-up)">+${tpPips} p</span> · SL: <span style="color:var(--trade-down)">-${slPips} p</span>`;
+            document.getElementById('modal-where').innerHTML = `Session: <b>${meta.session || 'London/NY'}</b> · Zone: ${meta.zone || (direction === 'BUY' ? 'Discount' : 'Premium')}`;
+            document.getElementById('modal-when').innerHTML = `Generated: ${new Date(sig.generated_at).toLocaleTimeString()} · Source: ${meta.data_source || 'Quantix AI'}`;
+            document.getElementById('modal-why').textContent = meta.why || sig.explainability || `SMC Structure detected. Market analysis points to ${direction} continuation based on institutional order flow.`;
+            document.getElementById('modal-how').textContent = `Execution: ${sig.is_market_entry ? 'MARKET' : 'PENDING'} · Engine: ${meta.engine || 'StructureEngine v1'}`;
+
+            modal.style.display = 'flex';
+        }
+
+        function closeSignalModal() {
+            document.getElementById('signal-detail-modal').style.display = 'none';
+        }
+
+        // Event Delegation for Signal Rows (Telesignal specific ID: signal-history)
+        const historyTbody = document.getElementById('signal-history');
+        if (historyTbody) {
+            historyTbody.addEventListener('click', function (e) {
+                const row = e.target.closest('tr');
+                if (!row) return;
+
+                const rowIndex = Array.from(row.parentNode.children).indexOf(row);
+                if (data.active && rowIndex === 0 && data.rawActive) {
+                    openSignalDetail(data.rawActive);
+                    return;
+                }
+                const offset = data.active ? 1 : 0;
+                const historyIndex = ((data.currentPage - 1) * data.itemsPerPage) + (rowIndex - offset);
+                if (data.rawHistory[historyIndex]) {
+                    openSignalDetail(data.rawHistory[historyIndex]);
+                }
+            });
+        }
+
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSignalModal(); });
+        document.addEventListener('click', (e) => {
+            if (e.target && e.target.id === 'signal-detail-modal') closeSignalModal();
+        });
+
+        // Add pointer cursor to signal rows
+        const rowStyle = document.createElement('style');
+        rowStyle.textContent = '#signal-history tr { cursor: pointer; transition: background 0.15s; } #signal-history tr:hover { background: rgba(56, 189, 248, 0.05) !important; }';
+        document.head.appendChild(rowStyle);
+
         // Security protections disabled for development
     </script>
+
+    <!-- 5W1H SIGNAL INTELLIGENCE MODAL (v3.8) -->
+    <div id="signal-detail-modal" style="
+        display:none; position:fixed; top:0; left:0; right:0; bottom:0; z-index:9999;
+        background:rgba(15,23,42,0.6); backdrop-filter:blur(4px);
+        align-items:center; justify-content:center;">
+        <div id="signal-detail-card" class="wh-card">
+            <button class="wh-close" onclick="closeSignalModal()">×</button>
+            <div class="wh-header">
+                <div>
+                    <div class="wh-title">Signal Intelligence Report</div>
+                    <div id="modal-signal-id"
+                        style="font-size:1.1rem; font-weight:800; color:white; margin-top:5px; font-family:var(--font-mono);">
+                    </div>
+                </div>
+                <div id="modal-status-badge"
+                    style="padding:4px 12px; border-radius:6px; font-size:0.7rem; font-weight:800; text-transform:uppercase; letter-spacing:1px;">
+                </div>
+            </div>
+
+            <div class="wh-grid">
+                <div class="wh-item">
+                    <span class="wh-label">Entry</span>
+                    <span id="modal-entry" class="wh-value"></span>
+                </div>
+                <div class="wh-item">
+                    <span class="wh-label" style="color:var(--trade-up)">Take Profit</span>
+                    <span id="modal-tp" class="wh-value" style="color:var(--trade-up)"></span>
+                </div>
+                <div class="wh-item">
+                    <span class="wh-label" style="color:var(--trade-down)">Stop Loss</span>
+                    <span id="modal-sl" class="wh-value" style="color:var(--trade-down)"></span>
+                </div>
+            </div>
+
+            <div class="wh-info-row">
+                <div class="wh-icon-box" style="background:var(--quantix-accent)">W</div>
+                <div class="wh-content">
+                    <div class="wh-c-label">Who — AI Model</div>
+                    <div id="modal-who" class="wh-c-val">Quantix v3.8 SMC | StructureEngine v1</div>
+                </div>
+            </div>
+
+            <div class="wh-info-row">
+                <div class="wh-icon-box" style="background:#8b5cf6">W</div>
+                <div class="wh-content">
+                    <div class="wh-c-label">What — Trade Specification</div>
+                    <div id="modal-what" class="wh-c-val"></div>
+                </div>
+            </div>
+
+            <div class="wh-info-row">
+                <div class="wh-icon-box" style="background:#10b981">W</div>
+                <div class="wh-content">
+                    <div class="wh-c-label">Where — Market Context</div>
+                    <div id="modal-where" class="wh-c-val"></div>
+                </div>
+            </div>
+
+            <div class="wh-info-row">
+                <div class="wh-icon-box" style="background:#f59e0b">W</div>
+                <div class="wh-content">
+                    <div class="wh-c-label">When — Timeline</div>
+                    <div id="modal-when" class="wh-c-val"></div>
+                </div>
+            </div>
+
+            <div class="wh-why-box wh-section">
+                <div class="wh-info-row" style="margin-bottom:0;">
+                    <div class="wh-icon-box" style="background:var(--quantix-accent)">W</div>
+                    <div class="wh-content">
+                        <div class="wh-c-label">Why — Technical Reasoning</div>
+                        <div id="modal-why" class="wh-c-val" style="font-weight:500;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="wh-info-row">
+                <div class="wh-icon-box" style="background:#475569">H</div>
+                <div class="wh-content">
+                    <div class="wh-c-label">How — Execution Method</div>
+                    <div id="modal-how" class="wh-c-val"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>
