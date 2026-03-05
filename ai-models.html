@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Models Guide — AI Token Index</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --gold: #D4AF37;
+            --gold-dark: #B8860B;
+            --green: #0ECB81;
+            --red: #F6465D;
+            --bg: #0B0E11;
+            --bg-card: #1E2329;
+            --border: #2B3139;
+            --text: #EAECEF;
+            --text-sub: #848E9C;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .header {
+            background: #181A20;
+            border-bottom: 1px solid var(--border);
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: black;
+            font-weight: 800;
+            font-size: 16px;
+        }
+
+        .logo-text {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--gold);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .main-nav {
+            display: flex;
+            gap: 4px;
+        }
+
+        .main-nav a {
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-sub);
+            border-radius: 6px;
+            transition: 0.2s;
+        }
+
+        .main-nav a:hover {
+            color: var(--gold);
+            background: rgba(212, 175, 55, 0.08);
+        }
+
+        .main-nav a.active {
+            color: var(--gold);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 24px;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .hero h1 {
+            font-size: 42px;
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+
+        .hero p {
+            font-size: 18px;
+            color: var(--text-sub);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .model-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .model-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 32px;
+            transition: 0.3s;
+        }
+
+        .model-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--gold);
+        }
+
+        .model-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .model-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(212, 175, 55, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+
+        .model-info h2 {
+            font-size: 22px;
+        }
+
+        .model-info span {
+            font-size: 14px;
+            color: var(--text-sub);
+        }
+
+        .price-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .price-table th {
+            text-align: left;
+            font-size: 12px;
+            color: var(--text-sub);
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .price-table td {
+            padding: 12px 0;
+            font-size: 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .price-gold {
+            color: var(--gold);
+            font-weight: 700;
+            font-family: 'JetBrains Mono';
+        }
+
+        .features {
+            list-style: none;
+            margin-top: 20px;
+        }
+
+        .features li {
+            font-size: 13px;
+            color: var(--text-sub);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .features li::before {
+            content: '✓';
+            color: var(--green);
+            font-weight: 800;
+        }
+
+        footer {
+            background: #181A20;
+            border-top: 1px solid var(--border);
+            padding: 40px 24px;
+            text-align: center;
+            color: var(--text-sub);
+            font-size: 13px;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <div class="header-left">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">Q</div>
+                <span class="logo-text">AI TOKEN INDEX</span>
+            </a>
+        </div>
+        <nav class="main-nav">
+            <a href="index.html">Home</a>
+            <a href="market.html">Market</a>
+            <a href="ai-models.html" class="active">AI Models</a>
+            <a href="https://9dpi.github.io/quantix-ai-core/index.html" target="_blank">Quantix AI</a>
+            <a href="https://www.linkedin.com/in/cuongvq/" target="_blank">Contact</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <section class="hero">
+            <h1>AI Models <span style="color:var(--gold)">Comparison</span></h1>
+            <p>In-depth analysis of costs and performance for the world's leading artificial intelligence models
+                supported by the AI Token Index ecosystem.</p>
+        </section>
+
+        <div class="model-grid">
+            <!-- GPT-4o -->
+            <div class="model-card">
+                <div class="model-header">
+                    <div class="model-icon">🤖</div>
+                    <div class="model-info">
+                        <h2>GPT-4o</h2>
+                        <span>OpenAI • Flagship Model</span>
+                    </div>
+                </div>
+                <p style="font-size: 14px; color: var(--text-sub); line-height: 1.6;">The most powerful and versatile
+                    model today, suitable for all tasks from programming to content creation.</p>
+                <table class="price-table">
+                    <thead>
+                        <tr>
+                            <th>TOKEN TYPE</th>
+                            <th>PRICE PER 1M TOKENS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Input Tokens</td>
+                            <td class="price-gold">$2.50</td>
+                        </tr>
+                        <tr>
+                            <td>Output Tokens</td>
+                            <td class="price-gold">$10.00</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <ul class="features">
+                    <li>Multi-modal support (Text, Image)</li>
+                    <li>Extremely fast response speed</li>
+                    <li>High-level logical reasoning capabilities</li>
+                </ul>
+            </div>
+
+            <!-- Claude 3.5 -->
+            <div class="model-card">
+                <div class="model-header">
+                    <div class="model-icon">🟤</div>
+                    <div class="model-info">
+                        <h2>Claude 3.5 Sonnet</h2>
+                        <span>Anthropic • Advanced Reasoning</span>
+                    </div>
+                </div>
+                <p style="font-size: 14px; color: var(--text-sub); line-height: 1.6;">Famous for natural writing and
+                    rigorous logical thinking, highly regarded by technical experts.</p>
+                <table class="price-table">
+                    <thead>
+                        <tr>
+                            <th>TOKEN TYPE</th>
+                            <th>PRICE PER 1M TOKENS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Input Tokens</td>
+                            <td class="price-gold">$3.00</td>
+                        </tr>
+                        <tr>
+                            <td>Output Tokens</td>
+                            <td class="price-gold">$15.00</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <ul class="features">
+                    <li>Context Window up to 200K tokens</li>
+                    <li>Superior coding and debugging</li>
+                    <li>Most human-like communication style</li>
+                </ul>
+            </div>
+
+            <!-- DeepSeek-V3 -->
+            <div class="model-card">
+                <div class="model-header">
+                    <div class="model-icon">🔍</div>
+                    <div class="model-info">
+                        <h2>DeepSeek-V3</h2>
+                        <span>DeepSeek • Efficiency King</span>
+                    </div>
+                </div>
+                <p style="font-size: 14px; color: var(--text-sub); line-height: 1.6;">The world's most cost-effective
+                    solution with performance nearing top American models.</p>
+                <table class="price-table">
+                    <thead>
+                        <tr>
+                            <th>TOKEN TYPE</th>
+                            <th>PRICE PER 1M TOKENS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Input Tokens</td>
+                            <td class="price-gold">$0.27</td>
+                        </tr>
+                        <tr>
+                            <td>Output Tokens</td>
+                            <td class="price-gold">$1.10</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <ul class="features">
+                    <li>10-20x cheaper than competitors</li>
+                    <li>Impressive math and coding performance</li>
+                    <li>Optimized for bulk processing tasks</li>
+                </ul>
+            </div>
+
+            <!-- Gemini 2.5 -->
+            <div class="model-card">
+                <div class="model-header">
+                    <div class="model-icon">♊</div>
+                    <div class="model-info">
+                        <h2>Gemini 2.5 Flash</h2>
+                        <span>Google • Speed Optimizer</span>
+                    </div>
+                </div>
+                <p style="font-size: 14px; color: var(--text-sub); line-height: 1.6;">Optimized for speed and capable of
+                    handling massive context within the Google ecosystem.</p>
+                <table class="price-table">
+                    <thead>
+                        <tr>
+                            <th>TOKEN TYPE</th>
+                            <th>PRICE PER 1M TOKENS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Input Tokens</td>
+                            <td class="price-gold">$1.25</td>
+                        </tr>
+                        <tr>
+                            <td>Output Tokens</td>
+                            <td class="price-gold">$10.00</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <ul class="features">
+                    <li>Deep integration with Google search data</li>
+                    <li>1M+ token context window capability</li>
+                    <li>Lowest latency in its class</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2026 AI Token Index — Powered by <a href="https://9dpi.github.io/quantix-ai-core/index.html"
+                target="_blank" style="color:var(--gold); font-weight:700;">Quantix AI Core</a></p>
+    </footer>
+</body>
+
+</html>

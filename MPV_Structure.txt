@@ -1,0 +1,96 @@
+# 🌏 ARCHITECTURE & MVP DEPLOYMENT PLAN — AI TOKEN INDEX
+
+Tài liệu này tổng hợp toàn bộ thiết kế hệ thống và lộ trình phát triển cho hệ sinh thái **AI Token Index** — Cổng kết nối và quy đổi kinh tế AI toàn cầu.
+
+---
+
+## 🏗️ PHẦN 1: KIẾN TRÚC TỔNG THỂ (GLOBAL ARCHITECTURE)
+
+### 1. Tầm nhìn Sản phẩm
+Hệ thống không chỉ là một ứng dụng chat mà là một **AI Token Exchange & Index Hub**, cho phép theo dõi tỷ giá thời gian thực giữa tiền tệ pháp định (Fiat), kim loại quý (Gold), tiền mã hóa (Crypto) và các loại **AI Tokens** (OpenAI, Anthropic, Google, DeepSeek).
+
+### 2. Sơ đồ Kiến trúc (Updated)
+```mermaid
+graph TD
+    subgraph ClientLayer ["Client Layer (Responsive & Interactive)"]
+        A[Landing Page - AI Token Index]
+        B[Market Terminal - Trading View]
+        C[AI Models Guide - Benchmarking]
+        D[Mobile Terminal - Next.js Chat]
+    end
+
+    subgraph LogicLayer ["Core Logic Engine"]
+        E[Index Engine - Real-time Rates]
+        F[Currency Adapter - Binance/CEX API]
+        G[Token Converter - Multi-Model pricing]
+    end
+
+    subgraph DataLayer ["Data & Connectivity"]
+        H[Google Apps Script - API Gateway]
+        I[Google Sheets - Balance & User Data]
+        J[Quantix AI Core - Backend Integration]
+    end
+
+    A & B & C & D --> E
+    E --> F & G
+    E --- H
+    H --- I
+    A & B & C --- J
+```
+
+---
+
+## 💎 PHẦN 2: CƠ CHẾ QUY ĐỔI & CHỈ SỐ (THE INDEX LOGIC)
+
+- **Đơn vị Trung gian**: Sử dụng **Q** (Unit Q) làm thước đo tiêu chuẩn để quy đổi giá trị giữa các mô hình AI khác nhau.
+- **AI Token Portfolio**:
+    - **🤖 GPT-4o**: Hiệu năng cao, phổ biến nhất.
+    - **♊ Gemini 2.1**: Tốc độ và ngữ cảnh rộng từ Google.
+    - **🧠 DeepSeek-V3**: Tối ưu chi phí cực thấp từ DeepSeek.
+    - **🏺 Claude 3.5**: Khả năng lập luận và sáng tạo từ Anthropic.
+- **Thị trường Trọng điểm (Focus Pairs)**:
+    - **EUR / USD** (Euro).
+    - **GBP / USD** (Bảng Anh).
+    - **GOLD / USD** (Vàng thế giới).
+
+---
+
+## 🚀 PHẦN 3: CÁC THÀNH PHẦN ĐÃ TRIỂN KHAI (MVP MILESTONES)
+
+### 1. Landing Page (Index Page)
+- **Hero Section**: Thiết kế căn giữa sang trọng, tập trung vào thông điệp "Gateway to AI Economy".
+- **Real-time Converter**: Tích hợp menu dropdown phong phú với tên gọi và logo đặc trưng cho từng mô hình AI.
+- **Equal-Height Layout**: Widget Converter và Quickstart Guide được căn chỉnh đối xứng tuyệt đối.
+
+### 2. Market Terminal (Trading Interface)
+- **Technical Analysis**: Tích hợp ApexCharts hiển thị biến động giá thời gian thực.
+- **Order Execution**: Giao diện mô phỏng giao dịch chuyên nghiệp (Execution Log, Risk Analysis).
+- **Navigation**: Menu chính chuyển sang bên phải theo chuẩn UX hiện đại.
+
+### 3. Mobile Terminal (Next.js Application)
+- **Tech Stack**: Next.js 14, Tailwind CSS, TypeScript.
+- **English Language**: Toàn bộ giao diện đã được chuẩn hóa sang tiếng Anh quốc tế.
+- **Branding**: Đồng nhất nhận diện "AI Token Index - Mobile".
+
+---
+
+## 🎨 PHẦN 4: TIÊU CHUẨN THIẾT KẾ (DESIGN SYSTEM)
+
+- **Brand Name**: AI TOKEN INDEX.
+- **Slogan**: Gateway to AI Economy.
+- **Primary Color**: #D4AF37 (Gold Leaf) & #0B0E11 (Obsidian Deep).
+- **Secondary Color**: #0ECB81 (Success Green) & #F6465D (Danger Red).
+- **Typography**: Outfit & JetBrains Mono (cho dữ liệu số).
+- **Attribution**: Powered by **Quantix AI Core**.
+
+---
+
+## 📅 PHẦN 5: LỘ TRÌNH TIẾP THEO (NEXT STEPS)
+
+1. **Automation**: Tự động hóa cập nhật tỷ giá trực tiếp từ API của các nhà cung cấp AI vào Index.
+2. **User Profile**: Kết nối Google Login (NextAuth) để quản lý số dư Q cá nhân trên App Mobile.
+3. **Analytics**: Bổ sung phân tích xu hướng (Trend Analysis) cho từng loại AI Token dựa trên dữ liệu sử dụng thực tế.
+
+---
+**Độ hoàn thiện MVP: 100% Core Features**
+**Tiến trình: Đã sẵn sàng cho giai đoạn Beta Testing.**

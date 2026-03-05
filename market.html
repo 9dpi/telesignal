@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Market Terminal — AI Token Index</title>
+    <meta name="description"
+        content="Real-time trading terminal for AI Tokens. Monitor market rates, technical charts, and AI-driven analysis.">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+    <style>
+        /* ===== VARIABLES ===== */
+        :root {
+            --gold: #D4AF37;
+            --gold-dark: #B8860B;
+            --green: #0ECB81;
+            --red: #F6465D;
+            --cyan: #00D2FF;
+            --bg: #000000;
+            --bg-card: #0D1117;
+            --bg-panel: #161B22;
+            --border: #21262D;
+            --text: #E6EDF3;
+            --text-sub: #8B949E;
+            --text-dim: #484F58;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 10px;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            background: #0D1117;
+            border-bottom: 1px solid var(--border);
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            flex-shrink: 0;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo-icon {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: black;
+            font-weight: 800;
+            font-size: 14px;
+        }
+
+        .logo-text {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--gold);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 2px;
+        }
+
+        .nav-tabs a {
+            padding: 6px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-sub);
+            border-radius: 6px;
+            transition: 0.2s;
+        }
+
+        .nav-tabs a:hover {
+            color: var(--text);
+        }
+
+        .nav-tabs a.active {
+            color: var(--cyan);
+        }
+
+        .status-bar {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 12px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--green);
+            border-radius: 50%;
+            box-shadow: 0 0 6px var(--green);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: 0.4
+            }
+        }
+
+        /* ===== MAIN LAYOUT ===== */
+        .main-grid {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 300px 1fr 320px;
+            overflow: hidden;
+        }
+
+        /* ===== LEFT SIDEBAR: PAIR SELECTOR ===== */
+        .sidebar-left {
+            background: var(--bg-card);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar-search {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sidebar-search input {
+            width: 100%;
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            outline: none;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .sidebar-search input:focus {
+            border-color: var(--cyan);
+        }
+
+        .pair-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .pair-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            cursor: pointer;
+            transition: 0.15s;
+        }
+
+        .pair-item:hover {
+            background: var(--bg-panel);
+        }
+
+        .pair-item.active {
+            background: rgba(0, 210, 255, 0.08);
+            border-left: 3px solid var(--cyan);
+        }
+
+        .pair-item .left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .pair-item .icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            background: var(--bg-panel);
+        }
+
+        .pair-item .symbol {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .pair-item .fullname {
+            font-size: 11px;
+            color: var(--text-sub);
+        }
+
+        .pair-item .price {
+            font-family: 'JetBrains Mono';
+            font-size: 13px;
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .pair-item .change {
+            font-family: 'JetBrains Mono';
+            font-size: 11px;
+            font-weight: 600;
+            text-align: right;
+        }
+
+        /* Sidebar Converter */
+        .sidebar-converter {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(212, 175, 55, 0.03);
+        }
+
+        .side-conv-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--gold);
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+        }
+
+        .side-conv-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .side-conv-row input {
+            flex: 1;
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-family: 'JetBrains Mono';
+            width: 100%;
+        }
+
+        .side-conv-row select {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 6px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+
+        /* ===== CENTER: CHART & TABLE ===== */
+        .center-panel {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .chart-pair-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .chart-pair-name {
+            font-size: 22px;
+            font-weight: 800;
+        }
+
+        .chart-pair-price {
+            font-size: 28px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono';
+        }
+
+        .chart-timeframes {
+            display: flex;
+            gap: 4px;
+        }
+
+        .chart-timeframes button {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-sub);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            font-family: 'Outfit';
+            transition: 0.15s;
+        }
+
+        .chart-timeframes button.active,
+        .chart-timeframes button:hover {
+            background: var(--cyan);
+            color: black;
+            border-color: var(--cyan);
+        }
+
+        .chart-area {
+            flex: 1;
+            padding: 0 16px;
+            overflow: hidden;
+            position: relative;
+            min-height: 400px;
+            /* Đảm bảo biểu đồ luôn có không gian tối thiểu */
+        }
+
+        #mainChart {
+            width: 100%;
+            height: 100%;
+            min-height: 400px;
+        }
+
+        /* Execution Table */
+        .exec-section {
+            height: 220px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .exec-header {
+            display: flex;
+            gap: 2px;
+            padding: 8px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .exec-tab {
+            background: transparent;
+            border: none;
+            color: var(--text-sub);
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 4px;
+            font-family: 'Outfit';
+        }
+
+        .exec-tab.active {
+            color: var(--cyan);
+            background: rgba(0, 210, 255, 0.1);
+        }
+
+        .exec-table-wrap {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 16px;
+        }
+
+        .exec-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .exec-table th {
+            text-align: left;
+            padding: 8px;
+            color: var(--text-dim);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 11px;
+            position: sticky;
+            top: 0;
+            background: var(--bg-card);
+        }
+
+        .exec-table td {
+            padding: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .status-pill {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 3px;
+            text-transform: uppercase;
+        }
+
+        .status-active {
+            background: rgba(0, 210, 255, 0.15);
+            color: var(--cyan);
+        }
+
+        .status-completed {
+            background: rgba(14, 203, 129, 0.15);
+            color: var(--green);
+        }
+
+        .status-expired {
+            background: rgba(246, 70, 93, 0.15);
+            color: var(--red);
+        }
+
+        /* ===== RIGHT SIDEBAR: AI ANALYSIS ===== */
+        .sidebar-right {
+            background: var(--bg-card);
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar-right-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ai-section {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .ai-section-title {
+            font-size: 11px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .ai-metric {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 13px;
+        }
+
+        .ai-metric .label {
+            color: var(--text-sub);
+        }
+
+        .ai-metric .value {
+            font-weight: 700;
+            font-family: 'JetBrains Mono';
+        }
+
+        .thinking-log {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+
+        .thinking-log-title {
+            font-size: 11px;
+            color: var(--cyan);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .log-entry {
+            font-family: 'JetBrains Mono';
+            font-size: 11px;
+            color: var(--text-sub);
+            line-height: 1.8;
+            padding-left: 12px;
+            border-left: 2px solid var(--border);
+            margin-bottom: 8px;
+        }
+
+        .log-entry .timestamp {
+            color: var(--text-dim);
+        }
+
+        .log-entry .highlight {
+            color: var(--cyan);
+        }
+
+        .log-entry .warn {
+            color: var(--gold);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1200px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar-left,
+            .sidebar-right {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <header class="header">
+        <div class="header-left">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">Q</div>
+                <span class="logo-text">AI TOKEN INDEX</span>
+            </a>
+        </div>
+        <div class="nav-right-group" style="display: flex; align-items: center; gap: 20px;">
+            <nav class="nav-tabs">
+                <a href="index.html">Home</a>
+                <a href="market.html" class="active">Market</a>
+                <a href="ai-models.html">AI Models</a>
+                <a href="https://9dpi.github.io/quantix-ai-core/index.html" target="_blank">Quantix AI</a>
+                <a href="https://www.linkedin.com/in/cuongvq/" target="_blank">Contact</a>
+            </nav>
+            <div class="status-bar" style="border-left: 1px solid var(--border); padding-left: 20px;">
+                <span class="status-dot"></span>
+                <span style="color:var(--green); font-weight:700;">LIVE FEED</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN 3-COLUMN LAYOUT -->
+    <div class="main-grid">
+
+        <!-- LEFT: PAIR LIST -->
+        <aside class="sidebar-left">
+            <div class="sidebar-search">
+                <input type="text" id="pairSearch" placeholder="🔍 Search pairs..." oninput="filterPairs(this.value)">
+            </div>
+
+            <!-- Sidebar Converter -->
+            <div class="sidebar-converter">
+                <div class="side-conv-title">Quick Converter</div>
+                <div class="side-conv-row">
+                    <input type="number" id="sideAmount" value="1" oninput="sideConvert()">
+                    <select id="sideFrom" onchange="sideConvert()">
+                        <option value="USD">USD</option>
+                        <option value="BTC">BTC</option>
+                        <option value="XAU">GOLD</option>
+                    </select>
+                </div>
+                <div class="side-conv-row">
+                    <input type="text" id="sideResult" value="—" readonly style="color:var(--gold)">
+                    <select id="sideTo" onchange="sideConvert()">
+                        <option value="GPT4O">GPT4o</option>
+                        <option value="CLAUDE">CLAUDE</option>
+                        <option value="DEEPSEEK">DEEP</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="pair-list" id="pairList"></div>
+        </aside>
+
+        <!-- CENTER: CHART + EXECUTION -->
+        <main class="center-panel">
+            <div class="chart-header">
+                <div class="chart-pair-info">
+                    <span class="chart-pair-name" id="activePairName">BTC / Q</span>
+                    <span class="chart-pair-price" id="activePairPrice" style="color:var(--green)">—</span>
+                    <span id="activePairChange" style="font-size:14px; font-weight:600;"></span>
+                </div>
+                <div class="chart-timeframes">
+                    <button>1m</button>
+                    <button>5m</button>
+                    <button>15m</button>
+                    <button class="active">1h</button>
+                    <button>4h</button>
+                    <button>1D</button>
+                </div>
+            </div>
+
+            <div class="chart-area" id="mainChart"></div>
+
+            <div class="exec-section">
+                <div class="exec-header">
+                    <button class="exec-tab active">Token Execution Log</button>
+                    <button class="exec-tab">AI Predictions</button>
+                    <button class="exec-tab">Conversion History</button>
+                </div>
+                <div class="exec-table-wrap">
+                    <table class="exec-table">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Pair</th>
+                                <th>AI Model</th>
+                                <th>Tokens</th>
+                                <th>Cost (Q)</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="execBody">
+                            <tr>
+                                <td style="color:var(--text-dim)">09:21:03</td>
+                                <td>USD/GPT-4o</td>
+                                <td>🤖 GPT-4o</td>
+                                <td style="font-family:'JetBrains Mono'">1,024,000</td>
+                                <td style="font-family:'JetBrains Mono'; color:var(--gold)">6.40 Q</td>
+                                <td><span class="status-pill status-completed">Completed</span></td>
+                            </tr>
+                            <tr>
+                                <td style="color:var(--text-dim)">09:18:47</td>
+                                <td>BTC/DeepSeek</td>
+                                <td>🔍 DeepSeek-V3</td>
+                                <td style="font-family:'JetBrains Mono'">12,500,000</td>
+                                <td style="font-family:'JetBrains Mono'; color:var(--gold)">8.56 Q</td>
+                                <td><span class="status-pill status-completed">Completed</span></td>
+                            </tr>
+                            <tr>
+                                <td style="color:var(--text-dim)">09:15:22</td>
+                                <td>EUR/Claude</td>
+                                <td>🟤 Claude 3.5</td>
+                                <td style="font-family:'JetBrains Mono'">500,000</td>
+                                <td style="font-family:'JetBrains Mono'; color:var(--gold)">4.50 Q</td>
+                                <td><span class="status-pill status-active">Processing</span></td>
+                            </tr>
+                            <tr>
+                                <td style="color:var(--text-dim)">09:10:11</td>
+                                <td>XAU/Gemini</td>
+                                <td>♊ Gemini 2.5</td>
+                                <td style="font-family:'JetBrains Mono'">8,000,000</td>
+                                <td style="font-family:'JetBrains Mono'; color:var(--gold)">45.00 Q</td>
+                                <td><span class="status-pill status-expired">Timeout</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+
+        <!-- RIGHT: AI ANALYSIS -->
+        <aside class="sidebar-right">
+            <div class="sidebar-right-header">
+                <span style="color:var(--cyan)">⚡</span> Neural Market Feed
+            </div>
+
+            <div class="ai-section">
+                <div class="ai-section-title">Market Summary</div>
+                <div class="ai-metric"><span class="label">Trend</span><span class="value" style="color:var(--green)">📈
+                        BULLISH</span></div>
+                <div class="ai-metric"><span class="label">Volatility</span><span class="value">Neutral</span></div>
+                <div class="ai-metric"><span class="label">AI Confidence</span><span class="value"
+                        style="color:var(--cyan)">78%</span></div>
+            </div>
+
+            <div class="ai-section">
+                <div class="ai-section-title">Token Pricing Context</div>
+                <div class="ai-metric"><span class="label">GPT-4o Input</span><span class="value">$2.50/1M</span></div>
+                <div class="ai-metric"><span class="label">GPT-4o Output</span><span class="value">$10.00/1M</span>
+                </div>
+                <div class="ai-metric"><span class="label">DeepSeek-V3</span><span class="value"
+                        style="color:var(--green)">$0.27/1M</span></div>
+                <div class="ai-metric"><span class="label">Claude 3.5</span><span class="value">$3.00/1M</span></div>
+            </div>
+
+            <div class="ai-section">
+                <div class="ai-section-title">Risk Analysis</div>
+                <div class="ai-metric"><span class="label">API Stability</span><span class="value"
+                        style="color:var(--green)">99.2%</span></div>
+                <div class="ai-metric"><span class="label">Rate Limit Risk</span><span class="value"
+                        style="color:var(--gold)">Low</span></div>
+                <div class="ai-metric"><span class="label">Slippage Est.</span><span class="value">0.02%</span></div>
+            </div>
+
+            <div class="thinking-log">
+                <div class="thinking-log-title"><span style="color:var(--cyan)">▸</span> Thinking Logs</div>
+                <div class="log-entry">
+                    <span class="timestamp">[09:21:04]</span> <span class="highlight">ANALYSIS</span> GPT-4o pricing
+                    stable. Input/Output ratio maintained at 1:4 spread.
+                </div>
+                <div class="log-entry">
+                    <span class="timestamp">[09:20:58]</span> <span class="warn">ALERT</span> BTC volatility spike
+                    detected (+2.3% in 5m). Adjusting Q conversion buffer...
+                </div>
+                <div class="log-entry">
+                    <span class="timestamp">[09:20:30]</span> <span class="highlight">SYNC</span> Binance WebSocket
+                    reconnected. Feed latency: 42ms.
+                </div>
+                <div class="log-entry">
+                    <span class="timestamp">[09:19:55]</span> DeepSeek-V3 remains most cost-efficient model at $0.27/1M
+                    input tokens. Recommended for bulk operations.
+                </div>
+                <div class="log-entry">
+                    <span class="timestamp">[09:19:10]</span> <span class="highlight">CONVERT</span> EUR→Claude 3.5:
+                    500K tokens completed. Deducted 4.50 Q from pool.
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <script>
+        // ===== PAIR DATA =====
+        const PAIRS = [
+            { id: 'BTC', name: 'Bitcoin', sym: '₿', type: 'crypto', binance: 'BTCUSDT', fb: 97000 },
+            { id: 'ETH', name: 'Ethereum', sym: 'Ξ', type: 'crypto', binance: 'ETHUSDT', fb: 3800 },
+            { id: 'BNB', name: 'BNB', sym: '⬡', type: 'crypto', binance: 'BNBUSDT', fb: 680 },
+            { id: 'SOL', name: 'Solana', sym: '◎', type: 'crypto', binance: 'SOLUSDT', fb: 190 },
+            { id: 'DOGE', name: 'Dogecoin', sym: '🐕', type: 'crypto', binance: 'DOGEUSDT', fb: 0.35 },
+            { id: 'USD', name: 'US Dollar', sym: '🇺🇸', type: 'fiat', binance: null, fb: 1.0 },
+            { id: 'EUR', name: 'Euro', sym: '🇪🇺', type: 'fiat', binance: 'EURUSDT', fb: 1.08 },
+            { id: 'GBP', name: 'Pound', sym: '🇬🇧', type: 'fiat', binance: 'GBPUSDT', fb: 1.27 },
+            { id: 'XAU', name: 'Gold (oz)', sym: '🥇', type: 'metal', binance: null, fb: 2650 },
+        ];
+
+        let prices = {};
+        let activePair = 'BTC';
+
+        async function fetchAll() {
+            try {
+                const syms = PAIRS.filter(p => p.binance).map(p => `"${p.binance}"`);
+                const res = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbols=[${syms.join(',')}]`);
+                const data = await res.json();
+                data.forEach(d => {
+                    const p = PAIRS.find(x => x.binance === d.symbol);
+                    if (p) prices[p.id] = { price: +d.lastPrice, change: +d.priceChangePercent, vol: +d.quoteVolume };
+                });
+            } catch (e) { console.warn('API err', e); }
+
+            PAIRS.forEach(p => {
+                if (!prices[p.id]) prices[p.id] = { price: p.fb, change: +(Math.random() * 4 - 2).toFixed(2), vol: Math.random() * 1e9 };
+            });
+
+            renderPairList();
+            updateActivePanel();
+            sideConvert();
+        }
+
+        // ===== SIDE CONVERTER =====
+        const AI_PRICING = {
+            GPT4O: { name: 'GPT-4o', avg: 6.25 },
+            GEMINI: { name: 'Gemini 2.5', avg: 5.62 },
+            DEEPSEEK: { name: 'DeepSeek-V3', avg: 0.68 },
+            CLAUDE: { name: 'Claude 3.5', avg: 9.00 }
+        };
+
+        function sideConvert() {
+            const amount = parseFloat(document.getElementById('sideAmount').value) || 0;
+            const from = document.getElementById('sideFrom').value;
+            const to = document.getElementById('sideTo').value;
+
+            const fromUSD = prices[from]?.price || 1;
+            const tokens = (amount * fromUSD) / AI_PRICING[to].avg * 1000000;
+
+            document.getElementById('sideResult').value = tokens > 1000000
+                ? (tokens / 1000000).toFixed(1) + 'M'
+                : Math.round(tokens / 1000) + 'K';
+        }
+
+        function renderPairList(filter = '') {
+            const el = document.getElementById('pairList');
+            const filtered = PAIRS.filter(p => p.id.toLowerCase().includes(filter.toLowerCase()) || p.name.toLowerCase().includes(filter.toLowerCase()));
+
+            el.innerHTML = filtered.map(p => {
+                const d = prices[p.id] || { price: p.fb, change: 0 };
+                const chg = d.change;
+                const cls = chg >= 0 ? 'color:var(--green)' : 'color:var(--red)';
+                const sign = chg >= 0 ? '+' : '';
+
+                return `
+                    <div class="pair-item ${p.id === activePair ? 'active' : ''}" onclick="selectPair('${p.id}')">
+                        <div class="left">
+                            <div class="icon">${p.sym}</div>
+                            <div>
+                                <div class="symbol">${p.id} / Q</div>
+                                <div class="fullname">${p.name}</div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="price">${d.price.toFixed(d.price > 100 ? 2 : 4)}</div>
+                            <div class="change" style="${cls}">${sign}${chg.toFixed(2)}%</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function filterPairs(val) { renderPairList(val); }
+
+        function selectPair(id) {
+            activePair = id;
+            renderPairList();
+            updateActivePanel();
+            renderChart();
+        }
+
+        function updateActivePanel() {
+            const d = prices[activePair] || { price: 0, change: 0 };
+            const pair = PAIRS.find(p => p.id === activePair);
+            document.getElementById('activePairName').textContent = `${activePair} / Q`;
+            document.getElementById('activePairPrice').textContent = d.price.toFixed(d.price > 100 ? 2 : 6);
+            document.getElementById('activePairPrice').style.color = d.change >= 0 ? 'var(--green)' : 'var(--red)';
+            const sign = d.change >= 0 ? '+' : '';
+            document.getElementById('activePairChange').textContent = `${sign}${d.change.toFixed(2)}%`;
+            document.getElementById('activePairChange').style.color = d.change >= 0 ? 'var(--green)' : 'var(--red)';
+        }
+
+        // ===== CHART =====
+        let mainChart = null;
+
+        function renderChart() {
+            const d = prices[activePair] || { price: 1 };
+            const basePrice = d.price;
+            // Generate fake candlestick data
+            const data = [];
+            const now = Date.now();
+            for (let i = 50; i >= 0; i--) {
+                const t = now - i * 3600000;
+                const o = basePrice * (1 + (Math.random() - 0.5) * 0.04);
+                const c = o * (1 + (Math.random() - 0.5) * 0.03);
+                const h = Math.max(o, c) * (1 + Math.random() * 0.01);
+                const l = Math.min(o, c) * (1 - Math.random() * 0.01);
+                data.push({ x: new Date(t), y: [o, h, l, c].map(v => +v.toFixed(2)) });
+            }
+
+            if (mainChart) mainChart.destroy();
+
+            mainChart = new ApexCharts(document.getElementById('mainChart'), {
+                series: [{ data }],
+                chart: {
+                    type: 'candlestick',
+                    height: '100%',
+                    background: 'transparent',
+                    toolbar: { show: false },
+                    fontFamily: 'Outfit',
+                },
+                plotOptions: {
+                    candlestick: {
+                        colors: { upward: '#0ECB81', downward: '#F6465D' }
+                    }
+                },
+                xaxis: {
+                    type: 'datetime',
+                    labels: { style: { colors: '#484F58', fontSize: '11px' } },
+                    axisBorder: { show: false },
+                    axisTicks: { show: false },
+                },
+                yaxis: {
+                    labels: {
+                        style: { colors: '#484F58', fontSize: '11px' },
+                        formatter: v => v > 100 ? v.toFixed(0) : v.toFixed(4)
+                    }
+                },
+                grid: {
+                    borderColor: '#21262D',
+                    strokeDashArray: 2,
+                },
+                tooltip: {
+                    theme: 'dark',
+                },
+                theme: { mode: 'dark' }
+            });
+            mainChart.render();
+        }
+
+        // ===== INIT =====
+        fetchAll().then(() => renderChart());
+        setInterval(fetchAll, 10000);
+    </script>
+
+    <!-- FOOTER -->
+    <footer
+        style="background: #0D1117; border-top: 1px solid var(--border); padding: 30px 20px; text-align: center; color: var(--text-sub); font-size: 13px; flex-shrink: 0;">
+        <p>© 2026 AI Token Index — Powered by <a href="https://9dpi.github.io/quantix-ai-core/index.html"
+                target="_blank" style="color:var(--gold); font-weight:700;">Quantix AI Core</a></p>
+    </footer>
+</body>
+
+</html>
