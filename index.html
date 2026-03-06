@@ -2786,20 +2786,7 @@
             const volEl = document.getElementById('agent-vol-monitor');
             const sigStateEl = document.getElementById('agent-sig-state');
 
-            // Thinking Feed simulation
-            const now = Date.now();
-            if (now - lastAgentLog > 4000) { // Every 4 seconds
-                const insights = [
-                    "Analyzing local liquidity clusters...",
-                    "Neural structure synchronization: 100%",
-                    "Sentiment bias indexed: " + (signal ? signal.side : "NEUTRAL"),
-                    "Recursive pattern matching active.",
-                    "SNC variance within optimal range.",
-                    "Cross-pair correlation: STABLE"
-                ];
-                addNeuralInsight(insights[Math.floor(Math.random() * insights.length)]);
-                lastAgentLog = now;
-            }
+            // Thinking Logs are now handled by external fetcher loop.
 
             if (data.price) {
                 // Simulate regime based on price movement
@@ -2871,6 +2858,58 @@
                 advisoryText.textContent = "Current market conditions favor defensive strategies. Risk management is more critical than entry optimization in high-volatility environments. Consistency in lot-sizing is recommended over chasing impulse moves.";
             }
         }
+
+        // --- Real-time AI Thinking Logs Feed ---
+        let lastLogTimestamp = null;
+        async function fetchThinkingLogs() {
+            try {
+                // Determine API URL based on config or fallback to production
+                const baseUrl = (window.CONFIG && window.CONFIG.API_BASE) ? window.CONFIG.API_BASE : 'https://quantixapiserver-production.up.railway.app';
+                const url = `${baseUrl}/api/v1/health/thinking?limit=15`;
+                const response = await fetch(url);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.status === 'online' && data.logs) {
+                        // Reverse logs to chronologically ascending order
+                        const logs = data.logs.reverse();
+                        const newLogs = [];
+
+                        if (lastLogTimestamp === null) {
+                            // Initial load
+                            logs.slice(-5).forEach(log => newLogs.push(log));
+                        } else {
+                            // Find genuinely new logs
+                            logs.forEach(log => {
+                                if (new Date(log.timestamp) > new Date(lastLogTimestamp)) {
+                                    newLogs.push(log);
+                                }
+                            });
+                        }
+
+                        // Rendering Logs
+                        newLogs.forEach(l => {
+                            let text = l.status;
+                            if (text.includes(" - ")) {
+                                text = text.substring(text.indexOf(" - ") + 3);
+                            }
+
+                            let type = 'accent';
+                            if (text.includes("Failed") || text.includes("REJECT") || text.includes("below threshold")) type = 'down';
+                            if (text.includes("Evaluated") || text.includes("LOCKED") || text.includes("LIVE")) type = 'up';
+
+                            addNeuralInsight(`[${l.timestamp.substr(11, 8)} UTC] ${text}`, type);
+                            lastLogTimestamp = l.timestamp;
+                        });
+                    }
+                }
+            } catch (error) {
+                console.warn("Thinking Feed Polling Failed:", error);
+            }
+        }
+
+        // Initial fetch + 10s polling interval
+        setTimeout(fetchThinkingLogs, 500);
+        setInterval(fetchThinkingLogs, 10000);
 
         // --- Real-time Price Feed (Binance WebSocket) ---
         function initPriceFeed() {
